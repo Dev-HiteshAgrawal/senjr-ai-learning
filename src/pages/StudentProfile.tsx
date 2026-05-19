@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Star, Camera, CheckCircle, Linkedin, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Star, Camera, CheckCircle, MessageSquare, Link2 } from 'lucide-react'
 
 export default function StudentProfile() {
   const navigate = useNavigate()
@@ -56,7 +56,7 @@ export default function StudentProfile() {
               </div>
               <div>
                 <p style={{ fontSize: 14, fontWeight: 600 }}>Complete profile to earn +50 XP!</p>
-                <span className="senjr-badge senjr-badge-orange">🏆 Level 1 Newcomer</span>
+                <span className="senjr-badge senjr-badge-orange"> Level 1 Newcomer</span>
               </div>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function StudentProfile() {
 
             <div className="senjr-input-group">
               <label className="senjr-input-label">
-                <Linkedin size={14} style={{ display: 'inline', marginRight: 4 }} />
+                <Link2 size={14} style={{ display: 'inline', marginRight: 4 }} />
                 LinkedIn <span style={{ fontWeight: 400, color: 'var(--senjr-text-muted)' }}>(Optional)</span>
               </label>
               <input
@@ -132,7 +132,7 @@ export default function StudentProfile() {
                 style={{
                   width: 48, height: 28, borderRadius: 14,
                   background: form.whatsapp ? 'var(--senjr-green)' : 'var(--senjr-border)',
-                  position: 'relative', transition: 'background 0.2s'
+                  position: 'relative', transition: 'background 0.2s', border: 'none', cursor: 'pointer'
                 }}
               >
                 <div style={{

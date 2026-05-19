@@ -1,6 +1,6 @@
 # Senjr Deployment Checklist
 
-> **Status**: Vercel DEPLOYED. Firebase Auth pending. GitHub repo push pending.
+> **Status**: Vercel deployed. Firebase Auth config pending. GitHub repo push pending.
 > **Last updated**: 2026-05-19
 > **Billing**: Zero-budget — Firebase Spark (free) + Vercel Hobby (free) only.
 
@@ -50,7 +50,7 @@ git push -u origin main
 
 ### 2. Create Firebase Project (10 min)
 
-Without Firebase config, the app shows "Firebase Setup Required" on load.
+Without Firebase config, the public app still loads; real signup/login will stay inactive until these keys are added.
 
 1. Go to https://console.firebase.google.com/
 2. Click **Add project** → name it `senjr-ai-learning`
@@ -104,7 +104,7 @@ If you want pushes to `main` to auto-deploy to Vercel via CI:
 
 After adding Firebase env vars and redeploying, test these flows:
 
-1. Visit https://senjr-ai-learning.vercel.app → should show Senjr landing page (not "Firebase Setup Required")
+1. Visit https://senjr-ai-learning.vercel.app - should show the Senjr landing page
 2. Click "Sign up" → create account with email/password → should see dashboard
 3. Click "Continue with Google" → should redirect to Google OAuth → return to app
 4. Sign out → should return to auth screen

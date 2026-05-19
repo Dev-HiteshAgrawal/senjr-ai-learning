@@ -21,10 +21,10 @@ export const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null)
-  const [loading, setLoading] = useState(isConfigured)
+  const [loading, setLoading] = useState(isConfigured && Boolean(auth))
 
   useEffect(() => {
-    if (!isConfigured) {
+    if (!isConfigured || !auth) {
       return
     }
 
@@ -37,6 +37,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signOut = async () => {
+    if (!auth) {
+      setUser(null)
+      return
+    }
+
     await firebaseSignOut(auth)
     setUser(null)
   }

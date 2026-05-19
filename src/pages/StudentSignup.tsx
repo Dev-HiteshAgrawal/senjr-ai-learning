@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, User, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
 export default function StudentSignup() {
   const navigate = useNavigate()

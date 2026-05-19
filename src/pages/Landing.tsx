@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Home, GraduationCap, BookOpen, Trophy, User } from 'lucide-react'
+import { Home, GraduationCap, BookOpen, User } from 'lucide-react'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -42,6 +42,14 @@ export default function Landing() {
               onClick={() => navigate('/student-signup')}
             >
               Start Learning Free
+            </button>
+
+            <button
+              className="senjr-btn senjr-btn-outline senjr-btn-sm"
+              style={{ marginBottom: 12, width: '100%' }}
+              onClick={() => navigate('/mentor-signup')}
+            >
+              Become a Mentor
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 32 }}>

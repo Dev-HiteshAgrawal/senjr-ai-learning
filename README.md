@@ -115,7 +115,7 @@ npm run preview  # Preview production build
 
 - No paid Firebase features (stay on Spark tier)
 - No paid Vercel features (stay on Hobby tier)
-- OpenCode MiniMax free model for AI assistance
+- OpenCode free models per task, such as Qwen, DeepSeek, or Nemotron when available
 - Self-host LiveKit path for live rooms (future)
 - Manual outreach before paid ads
 

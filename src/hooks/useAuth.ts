@@ -31,7 +31,7 @@ export function useAuthActions() {
     name: string,
     role: UserRole
   ): Promise<AuthResult> => {
-    if (!isConfigured) {
+    if (!isConfigured || !auth) {
       return { success: false, error: 'Firebase not configured' }
     }
 
@@ -49,7 +49,7 @@ export function useAuthActions() {
   }
 
   const loginWithEmail = async (email: string, password: string): Promise<AuthResult> => {
-    if (!isConfigured) {
+    if (!isConfigured || !auth) {
       return { success: false, error: 'Firebase not configured' }
     }
 
@@ -66,7 +66,7 @@ export function useAuthActions() {
   }
 
   const loginWithGoogle = async (): Promise<AuthResult> => {
-    if (!isConfigured) {
+    if (!isConfigured || !auth || !googleProvider) {
       return { success: false, error: 'Firebase not configured' }
     }
 
