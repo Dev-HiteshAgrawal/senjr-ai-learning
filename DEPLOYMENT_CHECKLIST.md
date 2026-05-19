@@ -1,28 +1,38 @@
 # Senjr Deployment Checklist
 
-> **Status**: Ready for user account actions. All local preparation is complete.
+> **Status**: Vercel DEPLOYED. Firebase Auth pending. GitHub repo push pending.
 > **Last updated**: 2026-05-19
 > **Billing**: Zero-budget — Firebase Spark (free) + Vercel Hobby (free) only.
 
 ---
 
-## Completed (Local)
+## Completed
 
 - [x] `.gitignore` configured — `.env` and secrets excluded
 - [x] `.env.example` with all Firebase config keys
 - [x] `vercel.json` for SPA routing + asset caching
 - [x] GitHub Actions CI workflow (lint + build)
 - [x] GitHub Actions Vercel deploy workflow
-- [x] Build verified: `npm run build` passes (545 kB JS, 17 kB CSS)
-- [x] Git repo initialized, initial commit on `main` branch
+- [x] Build verified: `npm run build` passes
+- [x] Git repo initialized, 4 commits on `main` branch
 - [x] Firebase Auth code: email/password + Google sign-in ready
 - [x] AuthContext + useAuth hooks wired into App.tsx
+- [x] **Vercel deployed** — production live
+
+### Live URL
+
+**https://senjr-ai-learning.vercel.app**
+
+Deployment ID: `dpl_FvQT8r7FoVdTNptE4NdwSQ7cx6Zn`
+Vercel project: `zentropques-projects/senjr-ai-learning`
 
 ---
 
 ## Blocked — Requires YOUR Account Actions
 
 ### 1. Create GitHub Repository (5 min)
+
+The app is a local git repo with 4 commits but has no remote yet.
 
 ```bash
 # Option A: GitHub CLI (if installed)
@@ -40,6 +50,8 @@ git push -u origin main
 
 ### 2. Create Firebase Project (10 min)
 
+Without Firebase config, the app shows "Firebase Setup Required" on load.
+
 1. Go to https://console.firebase.google.com/
 2. Click **Add project** → name it `senjr-ai-learning`
 3. **Disable** Google Analytics (not needed, saves quota)
@@ -51,49 +63,31 @@ git push -u origin main
 7. Go to **Project settings** (gear icon) → **General** tab
 8. Scroll to **Your apps** → click **Web** (`</>`) icon
 9. Register app name: `senjr-ai-learning`
-10. Copy the config values into `.env`:
+10. Copy the config values into Vercel env vars:
 
-```bash
-cp .env.example .env
-# Edit .env with your real Firebase values
-```
+### 3. Add Firebase Env Vars to Vercel (3 min)
 
-### 3. Deploy to Vercel (5 min)
+After creating the Firebase project, add these 6 env vars to your Vercel project:
 
-**Option A: Vercel Dashboard (easiest, no CLI needed)**
-
-1. Go to https://vercel.com → Sign up with GitHub (free Hobby tier)
-2. Click **Add New** → **Project**
-3. Import your `senjr-ai-learning` GitHub repo
-4. Framework preset: **Vite** (auto-detected)
-5. Add environment variables (copy from `.env`):
+1. Go to https://vercel.com/zentropques-projects/senjr-ai-learning/settings/environment-variables
+2. Add each variable (copy from Firebase web app config):
    - `VITE_FIREBASE_API_KEY`
-   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_AUTH_DOMAIN` — format: `your-project.firebaseapp.com`
    - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_STORAGE_BUCKET` — format: `your-project.appspot.com`
    - `VITE_FIREBASE_MESSAGING_SENDER_ID`
    - `VITE_FIREBASE_APP_ID`
-6. Click **Deploy** → wait ~60 seconds
-7. Your app is live at `https://senjr-ai-learning.vercel.app`
-
-**Option B: Vercel CLI**
-
-```bash
-npm i -g vercel
-vercel login          # browser login
-vercel                # first deploy (interactive)
-vercel --prod         # production deploy
-```
+3. Redeploy — a new deployment will auto-trigger
 
 ### 4. (Optional) GitHub Actions Auto-Deploy
 
-If you want pushes to `main` to auto-deploy to Vercel:
+If you want pushes to `main` to auto-deploy to Vercel via CI:
 
 1. Generate token: Vercel Dashboard → Settings → **Tokens** → Create
 2. Add GitHub repo secrets:
    - `VERCEL_TOKEN` → your token
-   - `VERCEL_ORG_ID` → from Vercel project settings
-   - `VERCEL_PROJECT_ID` → from Vercel project settings
+   - `VERCEL_ORG_ID` → `team_nzH8YsnWhN6s0QF6Qo3rVUjq`
+   - `VERCEL_PROJECT_ID` → `prj_gCBYbIQgu8247JmjZsLAzlQHaAmV`
 
 ---
 
@@ -108,9 +102,9 @@ If you want pushes to `main` to auto-deploy to Vercel:
 
 ## Post-Deploy Verification
 
-After deployment, test these flows:
+After adding Firebase env vars and redeploying, test these flows:
 
-1. Visit your Vercel URL → should show Senjr landing page
+1. Visit https://senjr-ai-learning.vercel.app → should show Senjr landing page (not "Firebase Setup Required")
 2. Click "Sign up" → create account with email/password → should see dashboard
 3. Click "Continue with Google" → should redirect to Google OAuth → return to app
 4. Sign out → should return to auth screen
