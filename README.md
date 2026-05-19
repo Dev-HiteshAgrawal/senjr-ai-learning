@@ -66,6 +66,14 @@ cp .env.example .env
    - `VERCEL_PROJECT_ID` - found in Vercel project settings
 3. Push to main branch - deployment triggers automatically
 
+## Deployment
+
+See [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) for the complete step-by-step guide including:
+- GitHub repository creation
+- Firebase project setup (Spark free tier)
+- Vercel deployment (Hobby free tier)
+- Post-deploy verification steps
+
 ## GitHub Repository Setup
 
 1. Create a new repository on GitHub
