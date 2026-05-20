@@ -39,16 +39,34 @@ function PublicRoutes() {
 function ProtectedRoutes() {
   return (
     <Routes>
-      {/* Student routes */}
-      <Route path="/student-signup" element={<StudentSignup />} />
-      <Route path="/student-education" element={<StudentEducation />} />
-      <Route path="/student-goals" element={<StudentGoals />} />
-      <Route path="/student-profile" element={<StudentProfile />} />
-      <Route path="/dashboard" element={
+      {/* Role-based dashboard routes */}
+      <Route path="/dashboard/student" element={
         <ProtectedRoute allowedRoles={['student']}>
           <StudentDashboard />
         </ProtectedRoute>
       } />
+      <Route path="/dashboard/mentor" element={
+        <ProtectedRoute allowedRoles={['mentor']}>
+          <MentorHub />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/admin" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminPanel />
+        </ProtectedRoute>
+      } />
+      <Route path="/mentor/apply" element={
+        <ProtectedRoute allowedRoles={['pending_mentor']}>
+          <MentorHub />
+        </ProtectedRoute>
+      } />
+
+      {/* Student onboarding routes */}
+      <Route path="/student-signup" element={<StudentSignup />} />
+      <Route path="/student-education" element={<StudentEducation />} />
+      <Route path="/student-goals" element={<StudentGoals />} />
+      <Route path="/student-profile" element={<StudentProfile />} />
+      <Route path="/dashboard" element={<Navigate to="/dashboard/student" replace />} />
 
       {/* Mentor routes */}
       <Route path="/mentor-signup" element={<MentorSignup />} />
@@ -83,11 +101,12 @@ function ProtectedRoutes() {
           <BookSession />
         </ProtectedRoute>
       } />
-      <Route path="/admin" element={
+<Route path="/admin" element={
         <ProtectedRoute allowedRoles={['admin']}>
           <AdminPanel />
         </ProtectedRoute>
       } />
+      <Route path="/mentor-dashboard" element={<Navigate to="/dashboard/mentor" replace />} />
       <Route path="/profile" element={
         <ProtectedRoute>
           <UserProfile />

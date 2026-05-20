@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GraduationCap, ShieldCheck, Mail, Lock, User, AlertCircle, Loader2 } from 'lucide-react'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, isConfigured, db } from '../firebase/config'
 
@@ -30,45 +30,36 @@ const [error, setError] = useState('')
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
         const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid))
         const userData = userDoc.data()
-        const userRole = userData?.role || 'student'
+        const userRole = (userData?.role as 'student' | 'mentor' | 'pending_mentor' | 'admin') || 'student'
         
-        const currentDisplayName = userCredential.user.displayName || email.split('@')[0]
-        let parsedRole = userRole
-        try {
-          if (currentDisplayName.startsWith('{')) {
-            const parsed = JSON.parse(currentDisplayName)
-            parsedRole = parsed.role || userRole
-          }
-        } catch {
-          // Not JSON, use role from Firestore
-        }
-        
-        const newDisplayName = JSON.stringify({ name: currentDisplayName, role: parsedRole })
-        if (newDisplayName !== currentDisplayName) {
-          await updateProfile(userCredential.user, { displayName: newDisplayName })
-        }
-        if (userRole === 'mentor') {
-          navigate('/mentor-dashboard')
+        if (userRole === 'admin') {
+          navigate('/admin')
+        } else if (userRole === 'mentor') {
+          navigate('/dashboard/mentor')
+        } else if (userRole === 'pending_mentor') {
+          navigate('/mentor/apply')
         } else {
-          navigate('/dashboard')
+          navigate('/dashboard/student')
         }
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-        const displayNameValue = name || email.split('@')[0]
-        const profileData = JSON.stringify({ name: displayNameValue, role: role })
-        await updateProfile(userCredential.user, { displayName: profileData })
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           uid: userCredential.user.uid,
           email: userCredential.user.email,
           displayName: name || email.split('@')[0],
           role: role,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         })
         if (role === 'mentor') {
           navigate('/mentor-signup')
         } else {
           navigate('/student-signup')
         }
+
+        // After onboarding completion, redirect to:
+        // - Student: /dashboard/student
+        // - Mentor: /mentor/apply (pending verification)
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Authentication failed'

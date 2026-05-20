@@ -82,25 +82,20 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     return <Navigate to="/auth" state={{ from: location }} replace />
   }
 
-  // If roles are specified, check if user has allowed role
+// If roles are specified, check if user has allowed role
   if (allowedRoles && allowedRoles.length > 0) {
-    // Get user role from displayName (stored as JSON)
-    let userRole: string | null = null
-    if (user.displayName) {
-      try {
-        const data = JSON.parse(user.displayName)
-        userRole = data.role
-      } catch {
-        userRole = null
-      }
-    }
+    const userRole = user.role || 'student'
 
     // If user role doesn't match allowed roles, redirect to appropriate dashboard
-    if (userRole && !allowedRoles.includes(userRole as 'student' | 'mentor' | 'pending_mentor' | 'admin')) {
-      if (userRole === 'mentor' || userRole === 'pending_mentor') {
-        return <Navigate to="/mentor-hub" replace />
+    if (!allowedRoles.includes(userRole)) {
+      if (userRole === 'admin') {
+        return <Navigate to="/admin" replace />
+      } else if (userRole === 'mentor') {
+        return <Navigate to="/dashboard/mentor" replace />
+      } else if (userRole === 'pending_mentor') {
+        return <Navigate to="/mentor/apply" replace />
       }
-      return <Navigate to="/dashboard" replace />
+      return <Navigate to="/dashboard/student" replace />
     }
   }
 
