@@ -16,6 +16,7 @@ export default function StudentEducation() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    sessionStorage.setItem('signupEducation', JSON.stringify(form))
     navigate('/student-goals')
   }
 

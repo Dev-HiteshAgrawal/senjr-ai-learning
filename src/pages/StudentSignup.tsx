@@ -28,6 +28,10 @@ export default function StudentSignup() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (form.password !== form.confirmPassword) return
+    sessionStorage.setItem('signupName', form.name)
+    sessionStorage.setItem('signupEmail', form.email)
+    sessionStorage.setItem('signupPassword', form.password)
+    sessionStorage.setItem('signupPhone', form.phone)
     navigate('/student-education')
   }
 

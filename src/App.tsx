@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import Landing from './pages/Landing'
 import Auth from './pages/Auth'
 import StudentSignup from './pages/StudentSignup'
@@ -14,7 +15,7 @@ import StudentDashboard from './pages/StudentDashboard'
 import MentorHub from './pages/MentorHub'
 import Availability from './pages/Availability'
 import AITutorChat from './pages/AITutorChat'
-import WarRoom from './pages/WarRoom'
+import ExamPrep from './pages/WarRoom'
 import BookSession from './pages/BookSession'
 import AdminPanel from './pages/AdminPanel'
 import UserProfile from './pages/UserProfile'
@@ -72,9 +73,9 @@ function ProtectedRoutes() {
           <AITutorChat />
         </ProtectedRoute>
       } />
-      <Route path="/war-room" element={
+      <Route path="/intensive" element={
         <ProtectedRoute>
-          <WarRoom />
+          <ExamPrep />
         </ProtectedRoute>
       } />
       <Route path="/book-session" element={
@@ -137,10 +138,12 @@ function ProtectedRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {PublicRoutes().props.children}
-        {ProtectedRoutes().props.children}
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          {PublicRoutes().props.children}
+          {ProtectedRoutes().props.children}
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

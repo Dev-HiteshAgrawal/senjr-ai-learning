@@ -49,7 +49,7 @@ export default function WarRoom() {
         <button className="senjr-header-back" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} />
         </button>
-        <span className="senjr-header-title">War Room</span>
+        <span className="senjr-header-title">Intensive Courses</span>
         <button className="senjr-btn-icon">
           <Users size={18} />
         </button>
@@ -58,7 +58,7 @@ export default function WarRoom() {
       <div className="senjr-page">
         <div className="senjr-content">
           <div style={{ marginBottom: 24 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Exam War Rooms</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Exam Prep Intensive</h1>
             <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>30-day intensive prep with verified seniors</p>
           </div>
 
@@ -142,9 +142,9 @@ export default function WarRoom() {
           <BookOpen size={20} />
           Courses
         </button>
-        <button className="senjr-nav-item senjr-nav-item-active" onClick={() => navigate('/war-room')}>
+        <button className="senjr-nav-item senjr-nav-item-active" onClick={() => navigate('/intensive')}>
           <Trophy size={20} />
-          War Room
+          Intensive
         </button>
         <button className="senjr-nav-item" onClick={() => navigate('/profile')}>
           <User size={20} />

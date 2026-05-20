@@ -1,51 +1,42 @@
-import { useState } from 'react'
-import { Menu, Users, Calendar, DollarSign, Settings, AlertTriangle, CreditCard, Megaphone, ChevronRight, ArrowUp, CheckCircle, XCircle, Eye, FileText, Shield, Clock, Search } from 'lucide-react'
+import { useState, useEffect, useContext } from 'react'
+import { Menu, Users, Calendar, DollarSign, Settings, AlertTriangle, CreditCard, Megaphone, ChevronRight, ArrowUp, CheckCircle, XCircle, Eye, FileText, Shield, Clock, Search, MessageSquare, Flag, Download, Filter } from 'lucide-react'
+import {
+  getPendingVerifications,
+  reviewDocument,
+  getVerificationFlags,
+  getDocumentTypeLabel,
+  getStatusColor,
+  getStatusLabel,
+  updateMentorVerificationStatus,
+  type MentorDocument,
+  type DocumentStatus,
+} from '../services/verification'
+import { AuthContext } from '../contexts/AuthContext'
+
+interface PendingMentor {
+  mentorId: string
+  mentorName?: string
+  mentorEmail?: string
+  documents: MentorDocument[]
+  riskLevel: 'low' | 'medium' | 'high'
+  submittedAt: string
+}
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('overview')
+  const { user } = useContext(AuthContext) || { user: null }
+  const [pendingMentors, setPendingMentors] = useState<PendingMentor[]>([])
+  const [loading, setLoading] = useState(false)
+  const [selectedMentor, setSelectedMentor] = useState<PendingMentor | null>(null)
+  const [reviewNotes, setReviewNotes] = useState('')
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
 
   const stats = [
     { label: 'Total Users', value: '156', change: '+12%' },
     { label: 'Active Mentors', value: '23', change: null as string | null },
     { label: "Today's Sessions", value: '8', change: null as string | null },
     { label: 'Revenue', value: '₹4,200', change: null as string | null },
-  ]
-
-  const pendingVerifications = [
-    {
-      id: 1,
-      name: 'Rahul Sharma',
-      email: 'rahul@email.com',
-      submittedAt: '2 hours ago',
-      documents: [
-        { type: 'Aadhaar', status: 'pending' },
-        { type: 'Degree', status: 'pending' },
-        { type: 'Certificate', status: 'pending' },
-      ],
-      riskLevel: 'low',
-    },
-    {
-      id: 2,
-      name: 'Priya Singh',
-      email: 'priya@email.com',
-      submittedAt: '5 hours ago',
-      documents: [
-        { type: 'PAN Card', status: 'pending' },
-        { type: 'Marksheet', status: 'pending' },
-      ],
-      riskLevel: 'medium',
-    },
-    {
-      id: 3,
-      name: 'Amit Kumar',
-      email: 'amit@email.com',
-      submittedAt: '1 day ago',
-      documents: [
-        { type: 'Aadhaar', status: 'flagged' },
-        { type: 'Degree', status: 'pending' },
-      ],
-      riskLevel: 'high',
-    },
   ]
 
   const contentReviewQueue = [
@@ -81,6 +72,240 @@ export default function AdminPanel() {
     { id: 'users', label: 'Users', icon: Users },
   ]
 
+  const fetchPendingVerifications = async () => {
+    setLoading(true)
+    try {
+      const docs = await getPendingVerifications()
+      const mentorMap = new Map<string, PendingMentor>()
+
+      for (const doc of docs) {
+        if (!mentorMap.has(doc.mentorId)) {
+          mentorMap.set(doc.mentorId, {
+            mentorId: doc.mentorId,
+            mentorName: doc.mentorName,
+            mentorEmail: doc.mentorEmail,
+            documents: [],
+            riskLevel: 'low',
+            submittedAt: doc.submittedAt,
+          })
+        }
+        mentorMap.get(doc.mentorId)!.documents.push(doc)
+      }
+
+      const pending = Array.from(mentorMap.values()).map(m => {
+        let riskLevel: 'low' | 'medium' | 'high' = 'low'
+        for (const doc of m.documents) {
+          const flags = getVerificationFlags(doc, m.documents, m.mentorName)
+          if (flags.duplicateHash || flags.suspicious) riskLevel = 'high'
+          else if (flags.mismatchedNames || flags.lowQuality) riskLevel = 'medium'
+        }
+        return { ...m, riskLevel }
+      })
+
+      setPendingMentors(pending)
+      setPendingCount(pending.length)
+    } catch (err) {
+      console.error('Failed to fetch verifications:', err)
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    if (activeTab === 'verification') {
+      fetchPendingVerifications()
+    }
+  }, [activeTab])
+
+  const handleReview = async (docId: string, status: DocumentStatus) => {
+    if (!user) return
+
+    const result = await reviewDocument(docId, status, reviewNotes, user.uid)
+
+    if (result.success) {
+      setShowReviewModal(false)
+      setReviewNotes('')
+      setSelectedMentor(null)
+      fetchPendingVerifications()
+
+      if (selectedMentor) {
+        const allDocsApproved = selectedMentor.documents.every(d =>
+          d.id === docId ? status === 'approved' : d.status === 'approved'
+        )
+        if (allDocsApproved) {
+          await updateMentorVerificationStatus(selectedMentor.mentorId, 'verified')
+        } else if (selectedMentor.documents.every(d =>
+          d.id === docId ? status === 'rejected' : d.status === 'rejected'
+        )) {
+          await updateMentorVerificationStatus(selectedMentor.mentorId, 'rejected')
+        }
+      }
+    }
+  }
+
+  const openReviewModal = (mentor: PendingMentor) => {
+    setSelectedMentor(mentor)
+    setReviewNotes('')
+    setShowReviewModal(true)
+  }
+
+  const getRiskBadgeColor = (risk: 'low' | 'medium' | 'high') => {
+    switch (risk) {
+      case 'high': return { bg: '#FEF2F2', color: '#EF4444', border: '#FECACA' }
+      case 'medium': return { bg: '#FFFBEB', color: '#F59E0B', border: '#FDE68A' }
+      case 'low': return { bg: '#F0FDF4', color: '#10B981', border: '#A7F3D0' }
+    }
+  }
+
+  const renderReviewModal = () => {
+    if (!showReviewModal || !selectedMentor) return null
+
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: 16,
+      }}>
+        <div style={{
+          background: 'white',
+          borderRadius: 16,
+          padding: 24,
+          maxWidth: 480,
+          width: '100%',
+          maxHeight: '80vh',
+          overflow: 'auto',
+        }}>
+          <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Review Documents</h3>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 16 }}>
+            {selectedMentor.mentorName} - {selectedMentor.mentorEmail}
+          </p>
+
+          <div style={{ marginBottom: 16 }}>
+            {selectedMentor.documents.map((doc) => (
+              <div key={doc.id} style={{
+                  padding: 12,
+                  border: '1px solid var(--senjr-border)',
+                  borderRadius: 8,
+                  marginBottom: 8,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600 }}>{getDocumentTypeLabel(doc.documentType)}</p>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: 4,
+                      background: getStatusColor(doc.status),
+                      color: 'white',
+                      fontSize: 11,
+                      fontWeight: 600,
+                    }}>
+                      {getStatusLabel(doc.status)}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{doc.fileName}</p>
+                  {doc.flaggedReasons && doc.flaggedReasons.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      {doc.flaggedReasons.map((reason, i) => (
+                        <span key={i} style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '2px 6px',
+                          background: '#FEF2F2',
+                          color: '#EF4444',
+                          fontSize: 10,
+                          borderRadius: 4,
+                          marginRight: 4,
+                        }}>
+                          <Flag size={10} /> {reason}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+
+          <div className="senjr-input-group" style={{ marginBottom: 16 }}>
+            <label className="senjr-input-label">Reviewer Notes</label>
+            <textarea
+              className="senjr-input"
+              rows={3}
+              placeholder="Add notes about this verification..."
+              value={reviewNotes}
+              onChange={(e) => setReviewNotes(e.target.value)}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            {selectedMentor.documents.map((doc) => (
+              <div key={doc.id} style={{ flex: 1 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, marginBottom: 4, textAlign: 'center' }}>
+                  {getDocumentTypeLabel(doc.documentType).split(' ')[0]}
+                </p>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <button
+                    onClick={() => handleReview(doc.id, 'approved')}
+                    style={{
+                      flex: 1,
+                      padding: '8px 4px',
+                      background: '#F0FDF4',
+                      color: '#10B981',
+                      border: '1px solid #10B981',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <CheckCircle size={12} style={{ display: 'inline', marginRight: 2 }} /> Approve
+                  </button>
+                  <button
+                    onClick={() => handleReview(doc.id, 'rejected')}
+                    style={{
+                      flex: 1,
+                      padding: '8px 4px',
+                      background: '#FEF2F2',
+                      color: '#EF4444',
+                      border: '1px solid #EF4444',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <XCircle size={12} style={{ display: 'inline', marginRight: 2 }} /> Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => selectedMentor.documents.forEach(d => handleReview(d.id, 'needs_clarification'))}
+              className="senjr-btn senjr-btn-outline"
+              style={{ flex: 1 }}
+            >
+              <MessageSquare size={14} style={{ display: 'inline', marginRight: 4 }} />
+              Request Clarification
+            </button>
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="senjr-btn senjr-btn-sm"
+              style={{ padding: '8px 16px' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="senjr-app">
       <header className="senjr-header" style={{ background: 'var(--senjr-black)', color: 'white', border: 'none' }}>
@@ -96,7 +321,7 @@ export default function AdminPanel() {
               width: 16, height: 16, borderRadius: '50%',
               background: '#EF4444', color: 'white',
               fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700
-            }}>5</span>
+            }}>{pendingCount}</span>
           </button>
           <div className="senjr-avatar" style={{ width: 32, height: 32, fontSize: 14, background: 'var(--senjr-green)', color: 'white' }}>A</div>
         </div>
@@ -110,6 +335,7 @@ export default function AdminPanel() {
       }}>
         {tabs.map((tab) => {
           const Icon = tab.icon
+          const count = tab.id === 'verification' ? pendingCount : 0
           return (
             <button
               key={tab.id}
@@ -132,6 +358,18 @@ export default function AdminPanel() {
             >
               <Icon size={18} />
               {tab.label}
+              {count > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: '50%',
+                  transform: 'translateX(20px)',
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#EF4444',
+                }} />
+              )}
             </button>
           )
         })}
@@ -178,7 +416,7 @@ export default function AdminPanel() {
                   <Shield size={20} style={{ color: 'var(--senjr-orange)' }} />
                 </div>
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: 'var(--senjr-orange)' }}>
-                  {pendingVerifications.length} Mentor Verifications Pending
+                  {pendingCount} Mentor Verifications Pending
                 </span>
                 <ChevronRight size={18} style={{ color: 'var(--senjr-text-muted)' }} />
               </div>
@@ -258,100 +496,121 @@ export default function AdminPanel() {
                 <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Review and verify mentor documents</p>
               </div>
 
-              <div style={{ position: 'relative', marginBottom: 20 }}>
-                <Search size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--senjr-text-muted)' }} />
-                <input
-                  className="senjr-input"
-                  style={{ paddingLeft: 40 }}
-                  placeholder="Search mentors..."
-                />
+              <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <Search size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--senjr-text-muted)' }} />
+                  <input
+                    className="senjr-input"
+                    style={{ paddingLeft: 40 }}
+                    placeholder="Search mentors..."
+                  />
+                </div>
+                <button className="senjr-btn senjr-btn-sm" style={{ padding: '8px 12px', background: 'var(--senjr-bg)' }}>
+                  <Filter size={14} />
+                </button>
               </div>
 
-              {pendingVerifications.map((v) => (
-                <div key={v.id} className="senjr-card-flat" style={{
-                  marginBottom: 16,
-                  border: '2px solid var(--senjr-text)',
-                  boxShadow: '2px 2px 0 var(--senjr-text)',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div className="senjr-avatar" style={{
-                        width: 44, height: 44, fontSize: 16,
-                        background: v.riskLevel === 'high' ? '#FEF2F2' : 'var(--senjr-green-light)',
-                        color: v.riskLevel === 'high' ? '#EF4444' : 'var(--senjr-green-dark)',
-                      }}>
-                        {v.name.split(' ').map(n => n[0]).join('')}
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: 40 }}>
+                  <p style={{ color: 'var(--senjr-text-muted)' }}>Loading verifications...</p>
+                </div>
+              ) : pendingMentors.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 40, background: '#F0FDF4', borderRadius: 12 }}>
+                  <CheckCircle size={32} style={{ color: '#10B981', marginBottom: 8 }} />
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#059669' }}>All caught up!</p>
+                  <p style={{ fontSize: 12, color: '#059669' }}>No pending verifications</p>
+                </div>
+              ) : (
+                pendingMentors.map((v) => {
+                  const riskStyle = getRiskBadgeColor(v.riskLevel)
+                  return (
+                    <div key={v.mentorId} className="senjr-card-flat" style={{
+                      marginBottom: 16,
+                      border: '2px solid var(--senjr-text)',
+                      boxShadow: '2px 2px 0 var(--senjr-text)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div className="senjr-avatar" style={{
+                            width: 44, height: 44, fontSize: 16,
+                            background: riskStyle.bg,
+                            color: riskStyle.color,
+                          }}>
+                            {(v.mentorName || 'UN').split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </div>
+                          <div>
+                            <p style={{ fontSize: 15, fontWeight: 700 }}>{v.mentorName || 'Unknown'}</p>
+                            <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{v.mentorEmail || 'No email'}</p>
+                          </div>
+                        </div>
+                        <div style={{
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          background: riskStyle.bg,
+                          color: riskStyle.color,
+                          border: `1px solid ${riskStyle.border}`,
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}>
+                          {v.riskLevel === 'high' ? 'High Risk' : v.riskLevel === 'medium' ? 'Medium' : 'Low Risk'}
+                        </div>
                       </div>
-                      <div>
-                        <p style={{ fontSize: 15, fontWeight: 700 }}>{v.name}</p>
-                        <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{v.email}</p>
+
+                      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                        {v.documents.map((doc) => (
+                          <div key={doc.id} style={{
+                            flex: 1,
+                            padding: '8px',
+                            borderRadius: 8,
+                            background: doc.flaggedReasons?.length ? '#FEF2F2' : 'var(--senjr-bg)',
+                            border: `1px solid ${doc.flaggedReasons?.length ? '#FECACA' : 'var(--senjr-border)'}`,
+                            textAlign: 'center',
+                          }}>
+                            <FileText size={16} style={{ color: doc.flaggedReasons?.length ? '#EF4444' : 'var(--senjr-text-muted)', margin: '0 auto 4px' }} />
+                            <p style={{ fontSize: 11, fontWeight: 600 }}>{getDocumentTypeLabel(doc.documentType).split(' ')[0]}</p>
+                            <p style={{ fontSize: 10, color: doc.flaggedReasons?.length ? '#EF4444' : 'var(--senjr-text-muted)' }}>
+                              {doc.flaggedReasons?.length ? 'Flagged' : getStatusLabel(doc.status)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginBottom: 12 }}>
+                        <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
+                        Submitted {v.submittedAt}
+                      </p>
+
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={() => openReviewModal(v)}
+                          className="senjr-btn senjr-btn-sm"
+                          style={{
+                            flex: 1,
+                            padding: '8px 0',
+                            background: 'var(--senjr-green)',
+                            color: 'white',
+                            fontSize: 13,
+                            fontWeight: 600,
+                            border: 'none',
+                          }}
+                        >
+                          <Eye size={14} style={{ display: 'inline', marginRight: 4 }} /> Review
+                        </button>
+                        <button className="senjr-btn senjr-btn-sm" style={{
+                          padding: '8px 12px',
+                          background: 'var(--senjr-bg)',
+                          color: 'var(--senjr-text)',
+                          fontSize: 13,
+                          fontWeight: 600,
+                          border: '2px solid var(--senjr-text)',
+                        }}>
+                          <Download size={14} />
+                        </button>
                       </div>
                     </div>
-                    <span className={`senjr-badge ${v.riskLevel === 'high' ? 'senjr-badge-orange' : v.riskLevel === 'medium' ? 'senjr-badge-orange' : 'senjr-badge-green'}`} style={{ fontSize: 11 }}>
-                      {v.riskLevel === 'high' ? ' High Risk' : v.riskLevel === 'medium' ? 'Medium' : 'Low Risk'}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                    {v.documents.map((doc, i) => (
-                      <div key={i} style={{
-                        flex: 1,
-                        padding: '8px',
-                        borderRadius: 8,
-                        background: doc.status === 'flagged' ? '#FEF2F2' : 'var(--senjr-bg)',
-                        border: `1px solid ${doc.status === 'flagged' ? '#FECACA' : 'var(--senjr-border)'}`,
-                        textAlign: 'center',
-                      }}>
-                        <FileText size={16} style={{ color: doc.status === 'flagged' ? '#EF4444' : 'var(--senjr-text-muted)', margin: '0 auto 4px' }} />
-                        <p style={{ fontSize: 11, fontWeight: 600 }}>{doc.type}</p>
-                        <p style={{ fontSize: 10, color: doc.status === 'flagged' ? '#EF4444' : 'var(--senjr-text-muted)' }}>
-                          {doc.status === 'flagged' ? '⚠ Flagged' : 'Pending'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginBottom: 12 }}>
-                    <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
-                    Submitted {v.submittedAt}
-                  </p>
-
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button className="senjr-btn senjr-btn-sm" style={{
-                      flex: 1,
-                      padding: '8px 0',
-                      background: 'var(--senjr-green)',
-                      color: 'white',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      border: 'none',
-                    }}>
-                      <CheckCircle size={14} style={{ display: 'inline', marginRight: 4 }} /> Approve
-                    </button>
-                    <button className="senjr-btn senjr-btn-sm" style={{
-                      flex: 1,
-                      padding: '8px 0',
-                      background: '#FEF2F2',
-                      color: '#EF4444',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      border: '2px solid #EF4444',
-                    }}>
-                      <XCircle size={14} style={{ display: 'inline', marginRight: 4 }} /> Reject
-                    </button>
-                    <button className="senjr-btn senjr-btn-sm" style={{
-                      padding: '8px 12px',
-                      background: 'var(--senjr-bg)',
-                      color: 'var(--senjr-text)',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      border: '2px solid var(--senjr-text)',
-                    }}>
-                      <Eye size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  )
+                })
+              )}
             </>
           )}
 
@@ -378,7 +637,7 @@ export default function AdminPanel() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: 14, fontWeight: 600 }}>{c.title}</p>
-                      <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>By {c.author} • {c.type}</p>
+                      <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>By {c.author} - {c.type}</p>
                     </div>
                     <span className="senjr-badge senjr-badge-orange" style={{ fontSize: 11 }}>Pending</span>
                   </div>
@@ -476,6 +735,8 @@ export default function AdminPanel() {
           )}
         </div>
       </div>
+
+      {renderReviewModal()}
 
       <nav className="senjr-bottom-nav">
         <button className="senjr-nav-item senjr-nav-item-active">

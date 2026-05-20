@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Share2, Copy, Trophy, AlertCircle, Loader2 } from 'lucide-react'
 import { useAuthActions } from '../hooks/useAuth'
+import { createMentorProfile } from '../services/firestore'
 
 export default function MentorSuccess() {
   const navigate = useNavigate()
@@ -14,6 +15,9 @@ export default function MentorSuccess() {
       const email = sessionStorage.getItem('signupEmail')
       const password = sessionStorage.getItem('signupPassword')
       const name = sessionStorage.getItem('signupName')
+      const phone = sessionStorage.getItem('signupPhone')
+      const heardAbout = sessionStorage.getItem('signupHeardAbout')
+      const verification = JSON.parse(sessionStorage.getItem('signupVerification') || '{}')
 
       if (!email || !password || !name) {
         return
@@ -21,12 +25,25 @@ export default function MentorSuccess() {
 
       setIsSubmitting(true)
       try {
-        const result = await signupWithEmail(email, password, name, 'pending_mentor')
+        const result = await signupWithEmail(email, password, name, 'mentor')
         if (result.success) {
+          await createMentorProfile(email, {
+            email,
+            name,
+            phone: phone || undefined,
+            heardAbout: heardAbout || undefined,
+            portfolio: verification.idType ? {
+              education: verification.idType,
+            } : undefined,
+          })
+
           sessionStorage.removeItem('signupEmail')
           sessionStorage.removeItem('signupPassword')
           sessionStorage.removeItem('signupName')
           sessionStorage.removeItem('signupRole')
+          sessionStorage.removeItem('signupPhone')
+          sessionStorage.removeItem('signupHeardAbout')
+          sessionStorage.removeItem('signupVerification')
         } else {
           setError(result.error || 'Failed to create account')
         }
@@ -106,12 +123,12 @@ export default function MentorSuccess() {
               Congratulations!
             </h1>
             <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>
-              You're now a verified mentor!
+              Application submitted - pending review
             </h2>
 
             <p style={{ fontSize: 15, color: 'var(--senjr-text-muted)', lineHeight: 1.6, marginBottom: 32 }}>
-              Your expertise is ready to be shared.<br />
-              Welcome to the Expert Peer community.
+              Your application is under review by our team.<br />
+              You'll be notified once approved (usually within 24-48 hours).
             </p>
 
             <div className="senjr-card" style={{ width: '100%', marginBottom: 24 }}>

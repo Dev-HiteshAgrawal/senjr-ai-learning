@@ -31,7 +31,15 @@ export default function MentorSignup() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (canContinue) navigate('/mentor-verify')
+    if (canContinue) {
+      sessionStorage.setItem('signupName', form.name)
+      sessionStorage.setItem('signupEmail', form.email)
+      sessionStorage.setItem('signupPassword', form.password)
+      sessionStorage.setItem('signupPhone', form.phone)
+      sessionStorage.setItem('signupHeardAbout', form.heardAbout)
+      sessionStorage.setItem('signupStep', 'signup')
+      navigate('/mentor-verify')
+    }
   }
 
   return (

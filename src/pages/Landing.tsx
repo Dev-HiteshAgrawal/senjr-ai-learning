@@ -41,7 +41,7 @@ export default function Landing() {
     { icon: Users, title: 'Learn from Seniors', desc: 'Real advice from those who cleared it' },
     { icon: Sparkles, title: 'AI Tutor 24/7', desc: 'Get instant help with your doubts' },
     { icon: Trophy, title: 'Mock Tests', desc: 'Practice with real exam patterns' },
-    { icon: GraduationCap, title: 'Verified Mentors', desc: 'Only verified experts can teach' },
+    { icon: GraduationCap, title: 'Vetted Mentors', desc: 'Application-based mentors with verified expertise' },
   ]
 
   return (

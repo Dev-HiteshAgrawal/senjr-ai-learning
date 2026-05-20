@@ -21,6 +21,14 @@ export default function StudentGoals() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    sessionStorage.setItem('signupGoals', JSON.stringify({
+      goal,
+      exams,
+      weakSubjects,
+      strongSubjects,
+      language,
+      studyHours,
+    }))
     navigate('/student-profile')
   }
 

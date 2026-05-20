@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Star, Camera, CheckCircle, MessageSquare, Link2, AlertCircle, Loader2 } from 'lucide-react'
 import { useAuthActions } from '../hooks/useAuth'
+import { createStudentProfile } from '../services/firestore'
 
 export default function StudentProfile() {
   const navigate = useNavigate()
@@ -31,7 +32,7 @@ export default function StudentProfile() {
     setUsernameValid(value.length >= 3)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setIsSubmitting(true)
@@ -50,11 +51,30 @@ export default function StudentProfile() {
       const result = await signupWithEmail(email, password, name, 'student')
 
       if (result.success) {
-        // Clear session storage after successful signup
+        const education = JSON.parse(sessionStorage.getItem('signupEducation') || '{}')
+        const goals = JSON.parse(sessionStorage.getItem('signupGoals') || '{}')
+        const phone = sessionStorage.getItem('signupPhone')
+
+        await createStudentProfile(email, {
+          email,
+          name,
+          phone: phone || undefined,
+          education: education.level ? education : undefined,
+          goals: goals.goal,
+          targetExams: goals.exams,
+          weakSubjects: goals.weakSubjects,
+          strongSubjects: goals.strongSubjects,
+          language: goals.language,
+          learningPreferences: goals.studyHours ? { studyHours: goals.studyHours } : undefined,
+        })
+
         sessionStorage.removeItem('signupEmail')
         sessionStorage.removeItem('signupPassword')
         sessionStorage.removeItem('signupName')
         sessionStorage.removeItem('signupRole')
+        sessionStorage.removeItem('signupPhone')
+        sessionStorage.removeItem('signupEducation')
+        sessionStorage.removeItem('signupGoals')
 
         navigate('/dashboard')
       } else {

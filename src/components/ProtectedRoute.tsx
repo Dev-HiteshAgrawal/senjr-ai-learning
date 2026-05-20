@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom'
+import { AlertCircle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 interface ProtectedRouteProps {
@@ -10,10 +11,45 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   const { user, loading, configured } = useAuth()
   const location = useLocation()
 
-  // If Firebase is not configured, allow access (for development)
+  // If Firebase is not configured, show setup required page
   if (!configured) {
-    console.warn('Firebase not configured - allowing unrestricted access')
-    return <>{children}</>
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'var(--senjr-bg)',
+        padding: 24,
+      }}>
+        <div style={{ textAlign: 'center', maxWidth: 400 }}>
+          <div style={{
+            width: 64, height: 64,
+            borderRadius: 16,
+            background: '#FEE2E2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 24px',
+          }}>
+            <AlertCircle size={32} style={{ color: '#EF4444' }} />
+          </div>
+          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Setup Required</h2>
+          <p style={{ color: 'var(--senjr-text-muted)', marginBottom: 16 }}>
+            Authentication is not configured. Please ensure all required environment variables are set.
+          </p>
+          <a href="mailto:support@senjr.com" style={{
+            display: 'inline-block',
+            padding: '12px 24px',
+            background: 'var(--senjr-orange)',
+            color: 'white',
+            borderRadius: 8,
+            textDecoration: 'none',
+            fontWeight: 600,
+          }}>Contact Support</a>
+        </div>
+      </div>
+    )
   }
 
   // Show loading state while checking auth
