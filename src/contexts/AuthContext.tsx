@@ -2,7 +2,7 @@ import { createContext, useEffect, useState, type ReactNode } from 'react'
 import { onAuthStateChanged, signOut as firebaseSignOut, type User } from 'firebase/auth'
 import { auth, isConfigured } from '../firebase/config'
 
-export type UserRole = 'student' | 'mentor' | 'pending_mentor'
+export type UserRole = 'student' | 'mentor' | 'pending_mentor' | 'admin'
 
 export interface AppUser extends Omit<User, 'displayName'> {
   role?: UserRole

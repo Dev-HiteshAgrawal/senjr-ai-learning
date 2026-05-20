@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GraduationCap, ShieldCheck, Mail, Lock, User } from 'lucide-react'
+import { GraduationCap, ShieldCheck, Mail, Lock, User, AlertCircle, Loader2 } from 'lucide-react'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { auth, isConfigured, db } from '../firebase/config'
 
 export default function Auth() {
   const navigate = useNavigate()
@@ -9,17 +12,81 @@ export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (mode === 'signup') {
-      if (role === 'student') {
-        navigate('/student-signup')
-      } else {
-        navigate('/mentor-signup')
+    setError('')
+    setIsSubmitting(true)
+
+    try {
+      if (!isConfigured || !auth || !db) {
+        setError('Firebase is not configured. Please contact support.')
+        return
       }
-    } else {
-      navigate('/dashboard')
+
+      if (mode === 'login') {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password)
+        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid))
+        const userData = userDoc.data()
+        const userRole = userData?.role || 'student'
+        
+        const currentDisplayName = userCredential.user.displayName || email.split('@')[0]
+        let parsedRole = userRole
+        try {
+          if (currentDisplayName.startsWith('{')) {
+            const parsed = JSON.parse(currentDisplayName)
+            parsedRole = parsed.role || userRole
+          }
+        } catch {
+          // Not JSON, use role from Firestore
+        }
+        
+        const newDisplayName = JSON.stringify({ name: currentDisplayName, role: parsedRole })
+        if (newDisplayName !== currentDisplayName) {
+          await updateProfile(userCredential.user, { displayName: newDisplayName })
+        }
+        if (userRole === 'mentor') {
+          navigate('/mentor-dashboard')
+        } else {
+          navigate('/dashboard')
+        }
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+        const displayNameValue = name || email.split('@')[0]
+        const profileData = JSON.stringify({ name: displayNameValue, role: role })
+        await updateProfile(userCredential.user, { displayName: profileData })
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          uid: userCredential.user.uid,
+          email: userCredential.user.email,
+          displayName: name || email.split('@')[0],
+          role: role,
+          createdAt: new Date().toISOString()
+        })
+        if (role === 'mentor') {
+          navigate('/mentor-signup')
+        } else {
+          navigate('/student-signup')
+        }
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Authentication failed'
+      if (errorMessage.includes('auth/email-already-in-use')) {
+        setError('This email is already registered. Please sign in.')
+      } else if (errorMessage.includes('auth/invalid-email')) {
+        setError('Please enter a valid email address.')
+      } else if (errorMessage.includes('auth/weak-password')) {
+        setError('Password should be at least 6 characters.')
+      } else if (errorMessage.includes('auth/invalid-credential') || errorMessage.includes('auth/wrong-password')) {
+        setError('Invalid email or password.')
+      } else if (errorMessage.includes('auth/network-request-failed')) {
+        setError('Network error. Please check your connection.')
+      } else {
+        setError('Authentication failed. Please try again.')
+      }
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -52,9 +119,44 @@ export default function Auth() {
           <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>
             {mode === 'login' ? 'Sign in to continue learning' : 'Create your account'}
           </p>
+          {!isConfigured && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 16px',
+              background: 'rgba(234, 179, 8, 0.1)',
+              border: '1px solid rgba(234, 179, 8, 0.3)',
+              borderRadius: 8,
+              marginBottom: 16,
+              color: '#ca8a04',
+              fontSize: 13
+            }}>
+              <AlertCircle size={18} />
+              <span>Firebase not configured. Auth will not work until environment variables are set.</span>
+            </div>
+          )}
         </div>
 
         <div className="senjr-card" style={{ width: '100%', maxWidth: 400 }}>
+          {error && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 16px',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: 8,
+              marginBottom: 16,
+              color: '#ef4444',
+              fontSize: 14
+            }}>
+              <AlertCircle size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+
           {mode === 'signup' && (
             <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
               <button
@@ -131,7 +233,7 @@ export default function Auth() {
                   className="senjr-input"
                   type="password"
                   style={{ paddingLeft: 40 }}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -144,9 +246,17 @@ export default function Auth() {
             <button
               type="submit"
               className={`senjr-btn ${role === 'mentor' ? 'senjr-btn-orange' : 'senjr-btn-green'}`}
-              style={{ marginBottom: 16 }}
+              style={{ marginBottom: 16, opacity: isSubmitting ? 0.7 : 1 }}
+              disabled={isSubmitting}
             >
-              {mode === 'login' ? 'Sign In' : 'Create Account'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                </>
+              ) : (
+                mode === 'login' ? 'Sign In' : 'Create Account'
+              )}
             </button>
           </form>
 
@@ -154,13 +264,13 @@ export default function Auth() {
             <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>
               {mode === 'login' ? (
                 <>Don't have an account?{' '}
-                  <button type="button" onClick={() => setMode('signup')} style={{ color: 'var(--senjr-green)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => { setMode('signup'); setError('') }} style={{ color: 'var(--senjr-green)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
                     Sign up
                   </button>
                 </>
               ) : (
                 <>Already have an account?{' '}
-                  <button type="button" onClick={() => setMode('login')} style={{ color: 'var(--senjr-green)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => { setMode('login'); setError('') }} style={{ color: 'var(--senjr-green)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
                     Sign in
                   </button>
                 </>

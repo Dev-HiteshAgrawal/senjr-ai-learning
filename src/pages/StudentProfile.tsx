@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Star, Camera, CheckCircle, MessageSquare, Link2 } from 'lucide-react'
+import { ArrowLeft, Star, Camera, CheckCircle, MessageSquare, Link2, AlertCircle, Loader2 } from 'lucide-react'
+import { useAuthActions } from '../hooks/useAuth'
 
 export default function StudentProfile() {
   const navigate = useNavigate()
+  const { signupWithEmail, loading: authLoading } = useAuthActions()
   const [form, setForm] = useState({
     username: 'senjr_student',
     bio: '',
@@ -11,15 +13,71 @@ export default function StudentProfile() {
     whatsapp: true,
   })
   const [usernameValid, setUsernameValid] = useState(true)
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    // Check if we have signup data in sessionStorage
+    const email = sessionStorage.getItem('signupEmail')
+    const password = sessionStorage.getItem('signupPassword')
+    if (!email || !password) {
+      // No signup data - redirect to auth
+      navigate('/auth')
+    }
+  }, [navigate])
 
   const handleUsernameChange = (value: string) => {
     setForm({ ...form, username: value })
     setUsernameValid(value.length >= 3)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    navigate('/dashboard')
+    setError('')
+    setIsSubmitting(true)
+
+    const email = sessionStorage.getItem('signupEmail')
+    const password = sessionStorage.getItem('signupPassword')
+    const name = sessionStorage.getItem('signupName')
+
+    if (!email || !password || !name) {
+      setError('Missing signup information. Please try again.')
+      setIsSubmitting(false)
+      return
+    }
+
+    try {
+      const result = await signupWithEmail(email, password, name, 'student')
+
+      if (result.success) {
+        // Clear session storage after successful signup
+        sessionStorage.removeItem('signupEmail')
+        sessionStorage.removeItem('signupPassword')
+        sessionStorage.removeItem('signupName')
+        sessionStorage.removeItem('signupRole')
+
+        navigate('/dashboard')
+      } else {
+        setError(result.error || 'Failed to create account. Please try again.')
+      }
+    } catch {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const getErrorMessage = (errorMsg: string) => {
+    if (errorMsg.includes('auth/email-already-in-use')) {
+      return 'An account with this email already exists'
+    }
+    if (errorMsg.includes('auth/weak-password')) {
+      return 'Password should be at least 6 characters'
+    }
+    if (errorMsg.includes('Firebase not configured')) {
+      return 'Authentication system not configured. Please contact support.'
+    }
+    return errorMsg
   }
 
   return (
@@ -44,6 +102,24 @@ export default function StudentProfile() {
           <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 16 }}>
             Step 4 of 4
           </p>
+
+          {error && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 16px',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: 8,
+              marginBottom: 16,
+              color: '#ef4444',
+              fontSize: 14
+            }}>
+              <AlertCircle size={18} />
+              <span>{getErrorMessage(error)}</span>
+            </div>
+          )}
 
           <div className="senjr-card-green" style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -147,8 +223,20 @@ export default function StudentProfile() {
               </button>
             </div>
 
-            <button type="submit" className="senjr-btn senjr-btn-green">
-              Complete Signup
+            <button
+              type="submit"
+              className="senjr-btn senjr-btn-green"
+              disabled={isSubmitting || authLoading}
+              style={{ opacity: isSubmitting || authLoading ? 0.7 : 1 }}
+            >
+              {isSubmitting || authLoading ? (
+                <>
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  Creating account...
+                </>
+              ) : (
+                'Complete Signup'
+              )}
             </button>
           </form>
         </div>

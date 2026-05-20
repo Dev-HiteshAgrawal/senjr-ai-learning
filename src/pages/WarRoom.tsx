@@ -100,8 +100,8 @@ export default function WarRoom() {
                 <span style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Mentor: {room.mentor}</span>
               </div>
 
-              <button className="senjr-btn senjr-btn-green" style={{ fontSize: 14 }}>
-                Enroll Now
+              <button className="senjr-btn senjr-btn-green" style={{ fontSize: 14 }} onClick={() => navigate('/mock-test')}>
+                Take Mock Test
               </button>
             </div>
           ))}
@@ -112,11 +112,11 @@ export default function WarRoom() {
               <div>
                 <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Not sure which exam?</p>
                 <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 12 }}>Talk to our AI Career Advisor</p>
-                <button style={{
+                <button onClick={() => navigate('/ai-tutor')} style={{
                   padding: '8px 20px', borderRadius: 20,
                   background: 'var(--senjr-black)', color: 'white',
                   fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer'
-                }}>Consult</button>
+                }}>Consult AI Tutor</button>
               </div>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function WarRoom() {
               background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2D44 100%)',
               padding: 24, textAlign: 'center', position: 'relative'
             }}>
-              <div style={{ fontSize: 48, marginBottom: 8 }}>👨‍👩‍💻</div>
+              <div style={{ fontSize: 48, marginBottom: 8 }}>🎯</div>
               <p style={{ fontSize: 13, color: '#94A3B8' }}>Join 500+ students preparing together</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function WarRoom() {
           <BookOpen size={20} />
           Courses
         </button>
-        <button className="senjr-nav-item senjr-nav-item-active">
+        <button className="senjr-nav-item senjr-nav-item-active" onClick={() => navigate('/war-room')}>
           <Trophy size={20} />
           War Room
         </button>
