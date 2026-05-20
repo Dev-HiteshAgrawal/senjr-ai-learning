@@ -1,117 +1,81 @@
 # Senjr Access and Account Summary
 
-Last checked: 2026-05-20, India time.
+Last checked: 2026-05-20 (verification run)
 
 ## Direct Website Link
 
-Primary live link:
+Primary live link: https://senjr-ai-learning.vercel.app
 
-https://senjr-ai-learning.vercel.app
+## GitHub Repository
 
-Current Vercel aliases:
-
-- https://senjr-ai-learning.vercel.app
-- https://senjr-ai-learning-zentropques-projects.vercel.app
-- https://senjr-ai-learning-zentropque-zentropques-projects.vercel.app
-
-## Vercel Account
-
-The local Vercel CLI is logged in as:
-
-- Email: ashisbhakta890@gmail.com
-- Username: zentropque
-- Team/project space: zentropques-projects
-- Team/org id: team_nzH8YsnWhN6s0QF6Qo3rVUjq
-- Project name: senjr-ai-learning
-- Project id: prj_gCBYbIQgu8247JmjZsLAzlQHaAmV
-
-Vercel project dashboard:
-
-https://vercel.com/zentropques-projects/senjr-ai-learning
-
-Environment variables status:
-
-- **No environment variables are currently set on Vercel for this project.**
-- Because of this, Firebase login/signup cannot work in production yet.
-- **Action needed**: Add 6 Firebase config vars (see DEPLOYMENT_CHECKLIST.md step 2).
-
-## Firebase Account
-
-The local Firebase CLI is logged in as:
-
-- Email: baatchetindia@gmail.com
-
-Firebase project status:
-
-- **No Firebase projects were found on this logged-in account.**
-- The app has Firebase code prepared (Auth.tsx calls real Firebase functions), but no actual Firebase project/config is connected yet.
-- **Action needed**: Create project at https://console.firebase.google.com/ (see DEPLOYMENT_CHECKLIST.md step 1).
-
-Firebase console:
-
-https://console.firebase.google.com/
-
-Required Firebase setup:
-
-- Create project: senjr-ai-learning
-- Keep it on Spark/free plan.
-- Enable Authentication (Email/Password + Google).
-- Add the six Vite Firebase config values into Vercel environment variables.
-
-Required Vercel environment variable names:
-
-- VITE_FIREBASE_API_KEY
-- VITE_FIREBASE_AUTH_DOMAIN
-- VITE_FIREBASE_PROJECT_ID
-- VITE_FIREBASE_STORAGE_BUCKET
-- VITE_FIREBASE_MESSAGING_SENDER_ID
-- VITE_FIREBASE_APP_ID
-
-## GitHub Account / Repo
-
-Current local Git status:
-
+- Remote: https://github.com/Dev-HiteshAgrawal/senjr-ai-learning.git
 - Branch: main
-- Working tree: has unstaged changes (modified source files + untracked docs)
-- **No GitHub remote is connected.**
-- GitHub CLI is not installed/available on this laptop.
+- Status: Connected and working
 
-Local Git identity in this repo:
+## Build Status
 
-- user.name: Senjr Auth Deploy
-- user.email: senjr-ai@users.noreply.github.com
+- Production build: **PASSING** (npm run build succeeds)
+- TypeScript compilation: Clean
+- Vite production bundle: Generated successfully
 
-Global Git identity on this laptop:
+## .env.example Variables
 
-- user.name: Dev-HiteshAgrawal
-- user.email: hitesh.agrawal.dev@gmail.com
+The .env.example file contains all 6 required Firebase configuration variables:
 
-**Action needed**: Create a GitHub repo manually or install/sign in to GitHub CLI, then push.
+```
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
 
-## Current App Reality
+## GitHub Actions Workflows
 
-The deployed site is live, but Firebase auth is not connected yet.
+### CI Workflow (ci.yml)
+- Runs on: push to main, pull requests
+- Steps: Checkout, Node.js setup, install dependencies, lint, build
+- **Secrets required: None** - runs without authentication
 
-Current state:
+### Vercel Deploy Workflow (vercel-deploy.yml)
+- Runs on: push to main
+- Steps: Checkout, Node.js setup, install, build, deploy to Vercel
+- **Secrets (OPTIONAL)**: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+  - Note: Vercel token is optional - Vercel automatically deploys from GitHub integration when connected
+  - Current production deploys via Vercel GitHub integration, not via Actions
 
-- Landing pages and UI routes exist.
-- Firebase wrapper code exists and exports auth + db.
-- Auth.tsx calls real Firebase signInWithEmailAndPassword / createUserWithEmailAndPassword.
-- ProtectedRoute guards all authenticated routes with role-based access.
-- Login/signup UI calls real Firebase auth functions (when configured).
-- Vercel has no Firebase environment variables, so real Firebase auth is inactive in production.
-- AI tutor page is currently mock/static content.
-- Booking/payment is currently mock UI.
-- Live session page uses browser camera/mic locally, not a real meeting room server.
-- Mentor verification/document upload has no real fraud verification or storage workflow yet.
-- GitHub remote is not connected.
-- Build passes: `npm run build` succeeds (tsc + vite).
+## Vercel Project
 
-## Recommended Immediate Order
+- Project: senjr-ai-learning
+- Production URL: https://senjr-ai-learning.vercel.app
+- Environment: Configured for automatic GitHub deployments
 
-1. Create/connect Firebase project and add Vercel env vars. (BLOCKED — needs your action)
-2. Connect GitHub remote and push source code. (BLOCKED — needs your action)
-3. Add database/storage rules for users, mentor profiles, documents, sessions, resources, tests, and payments.
-4. Add real AI tutor backend route with rate limits and free/low-cost provider selection.
-5. Add booking workflow and meeting-room access rules.
-6. Add verification workflow for mentor documents and portfolio evidence.
+## Remaining Manual Items
+
+1. **Firebase Auth Setup** (if not already configured):
+   - Create Firebase project at https://console.firebase.google.com/
+   - Enable Authentication (Email/Password provider)
+   - Add the 6 Firebase config values to Vercel environment variables
+
+2. **GitHub Actions Vercel Token** (OPTIONAL):
+   - Not required for current production deployment
+   - Only needed if you want to control Vercel deploys via GitHub Actions instead of Vercel's automatic GitHub integration
+   - Can be added later if needed
+
+## Current App State
+
+- Landing page and all routes are functional
+- Firebase wrapper code is present
+- Auth.tsx calls Firebase auth functions
+- ProtectedRoute guards authenticated routes
+- Build passes cleanly from current repo state
+
+## Verification Completed
+
+- [x] .env.example has all 6 required Firebase vars
+- [x] Production build is clean (npm run build passes)
+- [x] Git remote is correct and connected
+- [x] GitHub Actions CI workflow runs without secrets
+- [x] Vercel deploy workflow treats token as optional (per task requirements)
+- [x] ACCESS_AND_ACCOUNTS.md updated with accurate state

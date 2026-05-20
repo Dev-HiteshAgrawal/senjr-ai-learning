@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Users, Trophy, BookOpen, Target, BarChart3, Search, Bell, Sparkles, Clock, TrendingUp, Flame } from 'lucide-react'
+import { Trophy, BookOpen, Target, BarChart3, Search, Bell, Sparkles, Clock, TrendingUp, Flame, ChevronRight, Zap } from 'lucide-react'
 
 export default function StudentDashboard() {
   const navigate = useNavigate()
@@ -37,8 +37,8 @@ export default function StudentDashboard() {
   ]
 
   const recommendedMentors = [
-    { name: 'Rahul Sir', expertise: 'UP Police', rating: 4.8, price: 200, avatar: 'R' },
-    { name: 'Neha Ma\'am', expertise: 'Maths', rating: 4.9, price: 250, avatar: 'N' },
+    { name: 'Rahul Sir', expertise: 'UP Police', rating: 4.8, price: 200, avatar: 'R', online: true },
+    { name: 'Neha Ma\'am', expertise: 'Maths', rating: 4.9, price: 250, avatar: 'N', online: false },
   ]
 
   const streakDays = [
@@ -51,10 +51,17 @@ export default function StudentDashboard() {
     { day: 'S', done: false },
   ]
 
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 17) return 'Good afternoon'
+    return 'Good evening'
+  }
+
   return (
     <div className="senjr-app">
       <header className="senjr-header" style={{ background: 'var(--senjr-black)', color: 'white', border: 'none' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 20, cursor: 'pointer' }}>☰</span>
           <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--senjr-green)', letterSpacing: '-0.5px' }}>SENJR</span>
         </div>
@@ -74,9 +81,9 @@ export default function StudentDashboard() {
 
       <div className="senjr-page">
         <div className="senjr-content">
-          <div style={{ marginBottom: 20 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
-              Good morning, Hitesh! 👋
+          <div className="senjr-fade-in" style={{ marginBottom: 20 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
+              {getGreeting()}, Hitesh! 👋
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className="senjr-badge senjr-badge-green">Level 3 Scholar</span>
@@ -84,7 +91,7 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          <div className="senjr-card-flat" style={{ marginBottom: 20, background: 'var(--senjr-green-bg)', borderColor: 'var(--senjr-green-light)' }}>
+          <div className="senjr-card-flat senjr-fade-in" style={{ marginBottom: 20, background: 'var(--senjr-green-bg)', borderColor: 'var(--senjr-green-light)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               <span style={{ fontSize: 13, color: 'var(--senjr-green-dark)', fontWeight: 600 }}>Current XP</span>
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--senjr-green-dark)' }}>450 / 800 XP</span>
@@ -95,12 +102,12 @@ export default function StudentDashboard() {
           </div>
 
           <div className="senjr-grid-2" style={{ marginBottom: 20 }}>
-            {quickActions.map((a) => {
+            {quickActions.map((a, i) => {
               const Icon = a.icon
               return (
                 <button
                   key={a.label}
-                  className="senjr-card-flat"
+                  className="senjr-card-flat senjr-fade-in senjr-ripple"
                   style={{
                     textAlign: 'center',
                     padding: 16,
@@ -109,17 +116,18 @@ export default function StudentDashboard() {
                     background: a.color,
                     border: '2px solid var(--senjr-text)',
                     boxShadow: '2px 2px 0 var(--senjr-text)',
+                    animationDelay: `${i * 0.05}s`,
                   }}
                   onClick={() => navigate(a.route)}
                 >
                   <div style={{
-                    width: 40, height: 40, borderRadius: '50%',
+                    width: 44, height: 44, borderRadius: '50%',
                     background: 'white',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 8px',
                     border: '2px solid var(--senjr-text)',
                   }}>
-                    <Icon size={18} style={{ color: a.iconColor }} />
+                    <Icon size={20} style={{ color: a.iconColor }} />
                   </div>
                   <span style={{ fontSize: 12, fontWeight: 600 }}>{a.label}</span>
                 </button>
@@ -127,8 +135,8 @@ export default function StudentDashboard() {
             })}
           </div>
 
-          <div className="senjr-card-orange" style={{ marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <div className="senjr-card-orange senjr-fade-in" style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <Clock size={16} style={{ color: 'var(--senjr-orange)' }} />
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-orange-dark)' }}>UPCOMING SESSION</span>
             </div>
@@ -136,10 +144,10 @@ export default function StudentDashboard() {
             <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 4 }}>
               {todaySession.time} • {todaySession.topic}
             </p>
-            <p style={{ fontSize: 14, color: 'var(--senjr-orange)', fontWeight: 700, marginBottom: 12 }}>
+            <p style={{ fontSize: 14, color: 'var(--senjr-orange)', fontWeight: 700, marginBottom: 14 }}>
               {todaySession.countdown}
             </p>
-            <button className="senjr-btn senjr-btn-orange" style={{ padding: '10px 0' }} onClick={() => navigate('/live-session')}>
+            <button className="senjr-btn senjr-btn-orange senjr-ripple" style={{ padding: '10px 0' }} onClick={() => navigate('/live-session')}>
               Join Now
             </button>
           </div>
@@ -151,25 +159,25 @@ export default function StudentDashboard() {
                 View All →
               </button>
             </div>
-            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4 }}>
+            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4 }} className="senjr-scrollbar-hide">
               {progress.map((p) => (
                 <div key={p.subject} className="senjr-card-flat" style={{
-                  minWidth: 110, textAlign: 'center', padding: 14, marginBottom: 0,
+                  minWidth: 120, textAlign: 'center', padding: 16, marginBottom: 0,
                   border: '2px solid var(--senjr-text)',
                   boxShadow: '2px 2px 0 var(--senjr-text)',
                 }}>
                   <div style={{
-                    width: 64, height: 64, borderRadius: '50%',
+                    width: 68, height: 68, borderRadius: '50%',
                     border: `5px solid ${p.color}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    margin: '0 auto 8px',
+                    margin: '0 auto 10px',
                     background: 'white',
                     position: 'relative'
                   }}>
-                    <span style={{ fontSize: 16, fontWeight: 700 }}>{p.percent}%</span>
+                    <span style={{ fontSize: 18, fontWeight: 700 }}>{p.percent}%</span>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 600 }}>{p.subject}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, marginTop: 4 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>{p.subject}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, marginTop: 6 }}>
                     <TrendingUp size={12} style={{ color: 'var(--senjr-green)' }} />
                     <span style={{ fontSize: 11, color: 'var(--senjr-green)', fontWeight: 600 }}>{p.trend}</span>
                   </div>
@@ -178,16 +186,16 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          <div className="senjr-card-flat" style={{ marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
+          <div className="senjr-card-flat senjr-fade-in" style={{ marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <Target size={16} style={{ color: 'var(--senjr-orange)' }} />
+              <Zap size={16} style={{ color: 'var(--senjr-orange)' }} />
               <h3 className="senjr-section-title" style={{ fontSize: 15, marginBottom: 0 }}>Weak Topics to Practice</h3>
             </div>
             {weakTopics.map((t, i) => (
               <div key={t.topic} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 12px',
-                borderRadius: 8,
+                padding: '12px',
+                borderRadius: 10,
                 marginBottom: i < weakTopics.length - 1 ? 8 : 0,
                 background: i === 0 ? 'var(--senjr-orange-bg)' : 'var(--senjr-bg)',
                 border: i === 0 ? '1px solid var(--senjr-orange-light)' : '1px solid var(--senjr-border)',
@@ -197,12 +205,12 @@ export default function StudentDashboard() {
                   <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginLeft: 8 }}>{t.subject}</span>
                 </div>
                 <button
-                  className="senjr-btn senjr-btn-sm"
+                  className="senjr-btn senjr-btn-sm senjr-ripple"
                   style={{
-                    padding: '4px 12px',
+                    padding: '6px 14px',
                     background: t.priority === 'high' ? 'var(--senjr-orange)' : 'var(--senjr-green)',
                     color: 'white',
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 600,
                     border: 'none',
                   }}
@@ -214,8 +222,8 @@ export default function StudentDashboard() {
             ))}
           </div>
 
-          <div className="senjr-card-flat" style={{ background: 'var(--senjr-orange-bg)', marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, textAlign: 'center', marginBottom: 12 }}>
+          <div className="senjr-card-flat senjr-fade-in" style={{ background: 'var(--senjr-orange-bg)', marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, textAlign: 'center', marginBottom: 14 }}>
               <Flame size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4, color: 'var(--senjr-orange)' }} />
               7 Day Streak!
             </h3>
@@ -224,7 +232,7 @@ export default function StudentDashboard() {
                 <div key={d.day} style={{ textAlign: 'center' }}>
                   <span style={{ fontSize: 11, color: 'var(--senjr-text-muted)', display: 'block', marginBottom: 4, fontWeight: 500 }}>{d.day}</span>
                   <div style={{
-                    width: 32, height: 32, borderRadius: '50%',
+                    width: 34, height: 34, borderRadius: '50%',
                     background: d.done
                       ? (i === 5 ? 'var(--senjr-orange)' : 'var(--senjr-green)')
                       : 'var(--senjr-border)',
@@ -241,8 +249,11 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          <div className="senjr-card-flat" style={{ marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
-            <h3 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 12 }}>Recommended Mentors</h3>
+          <div className="senjr-card-flat senjr-fade-in" style={{ marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h3 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 0 }}>Recommended Mentors</h3>
+              <ChevronRight size={18} style={{ color: 'var(--senjr-text-muted)' }} />
+            </div>
             {recommendedMentors.map((m) => (
               <button
                 key={m.name}
@@ -256,22 +267,33 @@ export default function StudentDashboard() {
                   cursor: 'pointer',
                   width: '100%',
                   textAlign: 'left',
+                  transition: 'background 0.15s ease',
                 }}
                 onClick={() => navigate('/mentor-portfolio')}
               >
-                <div className="senjr-avatar" style={{ width: 40, height: 40, fontSize: 16, background: 'var(--senjr-green-light)', color: 'var(--senjr-green-dark)' }}>
-                  {m.avatar}
+                <div style={{ position: 'relative' }}>
+                  <div className="senjr-avatar" style={{ width: 44, height: 44, fontSize: 16, background: 'var(--senjr-green-light)', color: 'var(--senjr-green-dark)' }}>
+                    {m.avatar}
+                  </div>
+                  {m.online && (
+                    <div style={{
+                      position: 'absolute', bottom: 0, right: 0,
+                      width: 12, height: 12, borderRadius: '50%',
+                      background: 'var(--senjr-green)',
+                      border: '2px solid white',
+                    }} />
+                  )}
                 </div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</p>
-                  <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{m.expertise} •  {m.rating}</p>
+                  <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{m.expertise} • {m.rating} ⭐</p>
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--senjr-green)' }}>₹{m.price}/hr</span>
               </button>
             ))}
           </div>
 
-          <div className="senjr-card-flat" style={{ marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
+          <div className="senjr-card-flat senjr-fade-in" style={{ marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
             <h3 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 12 }}>Leaderboard</h3>
             {leaderboard.map((l) => (
               <div key={l.name} style={{
@@ -297,17 +319,17 @@ export default function StudentDashboard() {
       </div>
 
       <nav className="senjr-bottom-nav">
-        <button className="senjr-nav-item senjr-nav-item-active" onClick={() => navigate('/dashboard')}>
+        <button className="senjr-nav-item senjr-nav-item-active" onClick={() => navigate('/dashboard/student')}>
           <BarChart3 size={20} />
           Dashboard
         </button>
-        <button className="senjr-nav-item" onClick={() => navigate('/courses')}>
+        <button className="senjr-nav-item" onClick={() => navigate('/mock-test')}>
           <BookOpen size={20} />
-          Courses
+          Tests
         </button>
-        <button className="senjr-nav-item" onClick={() => navigate('/community')}>
-          <Users size={20} />
-          Community
+        <button className="senjr-nav-item" onClick={() => navigate('/ai-tutor')}>
+          <Sparkles size={20} />
+          AI Tutor
         </button>
         <button className="senjr-nav-item" onClick={() => navigate('/profile')}>
           <Target size={20} />

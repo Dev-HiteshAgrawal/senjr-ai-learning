@@ -93,7 +93,8 @@ export default function LiveSession() {
             borderRadius: 16,
             overflow: 'hidden',
             marginBottom: 16,
-            position: 'relative'
+            position: 'relative',
+            border: '2px solid #334155',
           }}>
             {cameraOn ? (
               <video ref={videoRef} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -101,9 +102,15 @@ export default function LiveSession() {
               <div style={{
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                height: '100%', gap: 8, color: '#64748B'
+                height: '100%', gap: 12, color: '#64748B'
               }}>
-                <CameraOff size={40} />
+                <div style={{
+                  width: 64, height: 64, borderRadius: '50%',
+                  background: '#334155',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <CameraOff size={28} />
+                </div>
                 <span style={{ fontSize: 14 }}>Camera is off</span>
               </div>
             )}
@@ -128,18 +135,19 @@ export default function LiveSession() {
                 background: 'var(--senjr-green)', color: 'white',
                 fontSize: 12, fontWeight: 600
               }}>
-                📺 Screen Sharing
+                Screen Sharing
               </div>
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 20 }}>
             <button
               className="senjr-btn-icon"
               style={{
                 background: micOn ? '#334155' : '#EF4444',
                 color: 'white', border: 'none',
-                width: 48, height: 48
+                width: 50, height: 50,
+                transition: 'all 0.15s ease',
               }}
               onClick={toggleMic}
             >
@@ -148,9 +156,10 @@ export default function LiveSession() {
             <button
               className="senjr-btn-icon"
               style={{
-                background: cameraOn ? '#334155' : '#334155',
+                background: cameraOn ? 'var(--senjr-green)' : '#334155',
                 color: 'white', border: 'none',
-                width: 48, height: 48
+                width: 50, height: 50,
+                transition: 'all 0.15s ease',
               }}
               onClick={toggleCamera}
             >
@@ -161,7 +170,8 @@ export default function LiveSession() {
               style={{
                 background: screenOn ? 'var(--senjr-green)' : '#334155',
                 color: 'white', border: 'none',
-                width: 48, height: 48
+                width: 50, height: 50,
+                transition: 'all 0.15s ease',
               }}
               onClick={toggleScreenShare}
             >
@@ -170,10 +180,10 @@ export default function LiveSession() {
             <button
               className="senjr-btn-icon"
               style={{
-                background: transcriptOn ? '#334155' : '#334155',
-                color: transcriptOn ? 'var(--senjr-green)' : 'white',
-                border: 'none',
-                width: 48, height: 48
+                background: transcriptOn ? 'var(--senjr-green)' : '#334155',
+                color: 'white', border: 'none',
+                width: 50, height: 50,
+                transition: 'all 0.15s ease',
               }}
               onClick={() => setTranscriptOn(!transcriptOn)}
             >
@@ -184,7 +194,9 @@ export default function LiveSession() {
               style={{
                 background: handRaised ? 'var(--senjr-orange)' : '#334155',
                 color: 'white', border: 'none',
-                width: 48, height: 48
+                width: 50, height: 50,
+                transition: 'all 0.15s ease',
+                animation: handRaised ? 'pulse 1.5s infinite' : 'none',
               }}
               onClick={() => setHandRaised(!handRaised)}
             >
@@ -195,7 +207,8 @@ export default function LiveSession() {
               style={{
                 background: '#EF4444',
                 color: 'white', border: 'none',
-                width: 48, height: 48
+                width: 50, height: 50,
+                transition: 'all 0.15s ease',
               }}
               onClick={() => navigate('/dashboard')}
             >
@@ -206,16 +219,16 @@ export default function LiveSession() {
           <div className="senjr-card-flat" style={{ background: '#1E293B', borderColor: '#334155', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
               <Users size={16} style={{ color: 'var(--senjr-green)' }} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Participants (4)</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Participants ({participants.length})</span>
             </div>
             {participants.map((p) => (
               <div key={p.id} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                padding: '8px 0',
+                padding: '10px 0',
                 borderBottom: '1px solid #334155'
               }}>
                 <div className="senjr-avatar" style={{
-                  width: 32, height: 32, fontSize: 12,
+                  width: 34, height: 34, fontSize: 13,
                   background: p.role === 'Mentor' ? 'var(--senjr-green)' : '#334155',
                   color: 'white'
                 }}>
@@ -244,7 +257,8 @@ export default function LiveSession() {
                     <span style={{
                       padding: '2px 8px', borderRadius: 4, fontSize: 10,
                       background: 'var(--senjr-orange-light)',
-                      color: 'var(--senjr-orange-dark)'
+                      color: 'var(--senjr-orange-dark)',
+                      animation: 'pulse 1.5s infinite',
                     }}>
                       ✋
                     </span>
@@ -256,14 +270,14 @@ export default function LiveSession() {
 
           {transcriptOn && (
             <div className="senjr-card-flat" style={{ background: '#1E293B', borderColor: '#334155' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <MessageSquare size={16} style={{ color: 'var(--senjr-green)' }} />
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Live Transcript</span>
               </div>
               <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.6 }}>
                 <span style={{ color: 'var(--senjr-green)', fontWeight: 600 }}>Mentor Riya:</span> Aaj hum AI ko shortcut nahi, skill amplifier ki tarah use karenge.
               </p>
-              <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.6, marginTop: 4 }}>
+              <p style={{ fontSize: 13, color: '#94A3B8', lineHeight: 1.6, marginTop: 6 }}>
                 <span style={{ color: 'var(--senjr-orange)', fontWeight: 600 }}>Aman:</span> Isse internship ka proof kaise banega?
               </p>
             </div>

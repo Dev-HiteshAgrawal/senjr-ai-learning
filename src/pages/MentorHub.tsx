@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Home, Calendar, DollarSign, Video, User, Star, Bell, BarChart3, Loader2 } from 'lucide-react'
+import { Home, Calendar, DollarSign, Video, User, Star, Bell, Loader2, TrendingUp, Users, Clock } from 'lucide-react'
 import { AuthContext } from '../contexts/AuthContext'
 import { getMentorBookings, confirmBooking, rejectBooking, type Session } from '../services/sessions'
 
@@ -83,6 +83,7 @@ export default function MentorHub() {
 
   const earnings = [350, 500, 300, 700, 900, 400, 600]
   const maxEarning = Math.max(...earnings)
+  const totalStudents = new Set(sessions.map(s => s.studentId)).size
 
   return (
     <div className="senjr-app">
@@ -91,8 +92,18 @@ export default function MentorHub() {
         <span style={{ fontSize: 16, fontWeight: 700 }}>Mentor Hub</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--senjr-green)' }}>₹{totalEarnings.toLocaleString()}</span>
-          <Bell size={20} style={{ color: 'white' }} />
-          <div className="senjr-avatar" style={{ width: 32, height: 32, fontSize: 14 }}>
+          <button style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <Bell size={20} style={{ color: 'white' }} />
+            {pendingRequests.length > 0 && (
+              <span style={{
+                position: 'absolute', top: -4, right: -4,
+                width: 16, height: 16, borderRadius: '50%',
+                background: 'var(--senjr-orange)', color: 'white',
+                fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700
+              }}>{pendingRequests.length}</span>
+            )}
+          </button>
+          <div className="senjr-avatar" style={{ width: 32, height: 32, fontSize: 14, background: 'var(--senjr-green)', color: 'white' }}>
             {user?.displayName?.charAt(0) || 'M'}
           </div>
         </div>
@@ -101,20 +112,21 @@ export default function MentorHub() {
       <div className="senjr-page">
         <div className="senjr-content">
           {loading ? (
-            <div style={{ textAlign: 'center', padding: 40 }}>
-              <Loader2 size={32} className="animate-spin" style={{ color: 'var(--senjr-green)' }} />
+            <div style={{ textAlign: 'center', padding: 60 }}>
+              <Loader2 size={36} className="animate-spin" style={{ color: 'var(--senjr-green)', marginBottom: 16 }} />
+              <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>Loading your dashboard...</p>
             </div>
           ) : (
             <>
               {pendingRequests.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
+                <div className="senjr-fade-in" style={{ marginBottom: 24 }}>
                   <h2 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 12 }}>
-                    🔔 New Booking Requests ({pendingRequests.length})
+                    New Booking Requests ({pendingRequests.length})
                   </h2>
                   {pendingRequests.map((session) => (
                     <div key={session.id} className="senjr-card" style={{ marginBottom: 12 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                        <div className="senjr-avatar" style={{ width: 40, height: 40, background: 'var(--senjr-orange-light)', color: 'var(--senjr-orange-dark)' }}>
+                        <div className="senjr-avatar" style={{ width: 44, height: 44, background: 'var(--senjr-orange-light)', color: 'var(--senjr-orange-dark)' }}>
                           {session.studentName.charAt(0)}
                         </div>
                         <div style={{ flex: 1 }}>
@@ -132,8 +144,8 @@ export default function MentorHub() {
                         <button
                           onClick={() => handleConfirm(session.id)}
                           disabled={processingId === session.id}
-                          className="senjr-btn senjr-btn-green"
-                          style={{ flex: 1, padding: '8px 12px', fontSize: 13 }}
+                          className="senjr-btn senjr-btn-green senjr-ripple"
+                          style={{ flex: 1, padding: '10px 12px', fontSize: 13 }}
                         >
                           {processingId === session.id ? <Loader2 size={14} className="animate-spin" /> : 'Confirm'}
                         </button>
@@ -141,7 +153,7 @@ export default function MentorHub() {
                           onClick={() => handleReject(session.id)}
                           disabled={processingId === session.id}
                           className="senjr-btn senjr-btn-outline"
-                          style={{ flex: 1, padding: '8px 12px', fontSize: 13, borderColor: 'var(--senjr-text-light)', color: 'var(--senjr-text-muted)' }}
+                          style={{ flex: 1, padding: '10px 12px', fontSize: 13, borderColor: 'var(--senjr-text-light)', color: 'var(--senjr-text-muted)' }}
                         >
                           Reject
                         </button>
@@ -151,8 +163,8 @@ export default function MentorHub() {
                 </div>
               )}
 
-              <div style={{ marginBottom: 20 }}>
-                <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
+              <div className="senjr-fade-in" style={{ marginBottom: 20 }}>
+                <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>
                   Welcome back, {user?.displayName?.split(' ')[0] || 'Mentor'}!
                 </h1>
                 <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>
@@ -163,61 +175,66 @@ export default function MentorHub() {
               </div>
 
               <div className="senjr-grid-3" style={{ marginBottom: 20 }}>
-                <div className="senjr-stat-card">
-                  <span className="senjr-stat-value" style={{ fontSize: 20 }}>{sessions.length}</span>
+                <div className="senjr-stat-card senjr-fade-in" style={{ background: 'var(--senjr-green-bg)', border: '1px solid var(--senjr-green-light)' }}>
+                  <Calendar size={18} style={{ color: 'var(--senjr-green)', margin: '0 auto 4px' }} />
+                  <span className="senjr-stat-value" style={{ fontSize: 20, color: 'var(--senjr-green)' }}>{sessions.length}</span>
                   <span className="senjr-stat-label">Sessions</span>
                 </div>
-                <div className="senjr-stat-card">
-                  <span className="senjr-stat-value" style={{ fontSize: 20 }}>{new Set(sessions.map(s => s.studentId)).size}</span>
+                <div className="senjr-stat-card senjr-fade-in" style={{ background: 'var(--senjr-orange-bg)', border: '1px solid var(--senjr-orange-light)' }}>
+                  <Users size={18} style={{ color: 'var(--senjr-orange)', margin: '0 auto 4px' }} />
+                  <span className="senjr-stat-value" style={{ fontSize: 20, color: 'var(--senjr-orange)' }}>{totalStudents}</span>
                   <span className="senjr-stat-label">Students</span>
                 </div>
-                <div className="senjr-stat-card">
-                  <span className="senjr-stat-value" style={{ fontSize: 20 }}>4.8</span>
-                  <span className="senjr-stat-label">Rating ⭐</span>
+                <div className="senjr-stat-card senjr-fade-in" style={{ background: '#FEF3C7', border: '1px solid #FDE68A' }}>
+                  <Star size={18} style={{ color: '#D97706', margin: '0 auto 4px' }} />
+                  <span className="senjr-stat-value" style={{ fontSize: 20, color: '#D97706' }}>4.8</span>
+                  <span className="senjr-stat-label">Rating</span>
                 </div>
               </div>
 
-              <div className="senjr-card-green" style={{ marginBottom: 24 }}>
+              <div className="senjr-card-green senjr-fade-in" style={{ marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>💰 Total Earnings</span>
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>Total Earnings</span>
                   <button style={{ fontSize: 13, color: 'var(--senjr-green)', fontWeight: 600 }} onClick={() => navigate('/earnings')}>
                     View →
                   </button>
                 </div>
-                <p style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>₹{totalEarnings.toLocaleString()}</p>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 60, marginBottom: 12 }}>
+                <p style={{ fontSize: 28, fontWeight: 800, marginBottom: 14 }}>₹{totalEarnings.toLocaleString()}</p>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 60, marginBottom: 14 }}>
                   {earnings.map((h, i) => (
                     <div key={i} style={{
                       flex: 1,
                       height: `${(h / maxEarning) * 100}%`,
                       background: i === 4 ? 'var(--senjr-green)' : 'var(--senjr-green-light)',
                       borderRadius: 4,
-                      minHeight: 8
+                      minHeight: 8,
+                      transition: 'height 0.3s ease',
                     }} />
                   ))}
                 </div>
-                <button className="senjr-btn senjr-btn-outline senjr-btn-sm" style={{ fontSize: 13 }}>
+                <button className="senjr-btn senjr-btn-outline senjr-btn-sm senjr-ripple" style={{ fontSize: 13 }}>
                   Withdraw to UPI
                 </button>
               </div>
 
               {upcomingSessions.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
+                <div className="senjr-fade-in" style={{ marginBottom: 24 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <h2 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 0 }}> Upcoming Sessions</h2>
+                    <h2 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 0 }}>Upcoming Sessions</h2>
                     <button style={{ fontSize: 13, color: 'var(--senjr-green)', fontWeight: 600 }} onClick={() => navigate('/availability')}>
                       View Calendar →
                     </button>
                   </div>
 
                   {upcomingSessions.map((s) => (
-                    <div key={s.id} className="senjr-card-flat" style={{
+                    <div key={s.id} className="senjr-card-flat senjr-ripple" style={{
                       display: 'flex', alignItems: 'center', gap: 12,
                       borderLeft: '3px solid var(--senjr-green)',
-                      marginBottom: 8
+                      marginBottom: 8,
+                      cursor: 'pointer',
                     }}>
                       <div className="senjr-avatar" style={{
-                        width: 40, height: 40, fontSize: 14,
+                        width: 44, height: 44, fontSize: 14,
                         background: 'var(--senjr-green-light)',
                         color: 'var(--senjr-green-dark)'
                       }}>
@@ -225,19 +242,21 @@ export default function MentorHub() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <p style={{ fontSize: 14, fontWeight: 600 }}>{s.studentName}</p>
-                        <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{s.date} • {s.time} • {s.duration} min</p>
+                        <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{s.date} • {s.time}</p>
                         <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{s.topic}</p>
                       </div>
-                      {s.meetingLink && (
+                      {s.meetingLink ? (
                         <a
                           href={s.meetingLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="senjr-btn senjr-btn-sm"
-                          style={{ padding: '6px 12px', fontSize: 12 }}
+                          className="senjr-btn senjr-btn-sm senjr-ripple"
+                          style={{ padding: '6px 14px', fontSize: 12 }}
                         >
                           Join
                         </a>
+                      ) : (
+                        <Clock size={16} style={{ color: 'var(--senjr-text-muted)' }} />
                       )}
                     </div>
                   ))}
@@ -245,30 +264,38 @@ export default function MentorHub() {
               )}
 
               <div className="senjr-grid-2" style={{ marginBottom: 24 }}>
-                <button className="senjr-card-flat" style={{ textAlign: 'center', padding: 16, cursor: 'pointer', marginBottom: 0 }} onClick={() => navigate('/availability')}>
-                  <Calendar size={20} style={{ color: 'var(--senjr-green)', margin: '0 auto 8px' }} />
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>Set Availability</span>
+                <button className="senjr-card-flat senjr-ripple" style={{ textAlign: 'center', padding: 18, cursor: 'pointer', marginBottom: 0 }} onClick={() => navigate('/availability')}>
+                  <Calendar size={22} style={{ color: 'var(--senjr-green)', margin: '0 auto 8px' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Set Availability</span>
                 </button>
-                <button className="senjr-card-flat" style={{ textAlign: 'center', padding: 16, cursor: 'pointer', marginBottom: 0 }} onClick={() => navigate('/mentor-profile')}>
-                  <User size={20} style={{ color: 'var(--senjr-green)', margin: '0 auto 8px' }} />
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>My Profile</span>
+                <button className="senjr-card-flat senjr-ripple" style={{ textAlign: 'center', padding: 18, cursor: 'pointer', marginBottom: 0 }} onClick={() => navigate('/mentor-profile')}>
+                  <User size={22} style={{ color: 'var(--senjr-green)', margin: '0 auto 8px' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>My Profile</span>
                 </button>
-                <button className="senjr-card-flat" style={{ textAlign: 'center', padding: 16, cursor: 'pointer', marginBottom: 0 }}>
-                  <Star size={20} style={{ color: 'var(--senjr-orange)', margin: '0 auto 8px' }} />
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>View Reviews</span>
+                <button className="senjr-card-flat senjr-ripple" style={{ textAlign: 'center', padding: 18, cursor: 'pointer', marginBottom: 0 }}>
+                  <Star size={22} style={{ color: 'var(--senjr-orange)', margin: '0 auto 8px' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>View Reviews</span>
                 </button>
-                <button className="senjr-card-flat" style={{ textAlign: 'center', padding: 16, cursor: 'pointer', marginBottom: 0 }}>
-                  <BarChart3 size={20} style={{ color: 'var(--senjr-green)', margin: '0 auto 8px' }} />
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>Analytics</span>
+                <button className="senjr-card-flat senjr-ripple" style={{ textAlign: 'center', padding: 18, cursor: 'pointer', marginBottom: 0 }}>
+                  <TrendingUp size={22} style={{ color: 'var(--senjr-green)', margin: '0 auto 8px' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Analytics</span>
                 </button>
               </div>
 
               {sessions.length === 0 && (
-                <div className="senjr-card-flat" style={{ textAlign: 'center', padding: 32, marginBottom: 24 }}>
-                  <p style={{ color: 'var(--senjr-text-muted)', fontSize: 14 }}>
+                <div className="senjr-card-flat senjr-fade-in" style={{ textAlign: 'center', padding: 40, marginBottom: 24 }}>
+                  <div style={{
+                    width: 64, height: 64, borderRadius: '50%',
+                    background: 'var(--senjr-green-bg)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 16px',
+                  }}>
+                    <Users size={28} style={{ color: 'var(--senjr-green)' }} />
+                  </div>
+                  <p style={{ color: 'var(--senjr-text-muted)', fontSize: 14, marginBottom: 4 }}>
                     No bookings yet. Share your profile to get students!
                   </p>
-                  <button className="senjr-btn senjr-btn-green" style={{ marginTop: 12 }} onClick={() => navigate('/mentor-profile')}>
+                  <button className="senjr-btn senjr-btn-green senjr-ripple" style={{ marginTop: 12 }} onClick={() => navigate('/mentor-profile')}>
                     View My Profile
                   </button>
                 </div>
@@ -289,7 +316,7 @@ export default function MentorHub() {
         </button>
         <button className="senjr-nav-item" style={{ position: 'relative', top: -8 }}>
           <div style={{
-            width: 48, height: 48, borderRadius: '50%',
+            width: 52, height: 52, borderRadius: '50%',
             background: 'var(--senjr-green)', color: 'white',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(16,185,129,0.4)'
