@@ -1,9 +1,14 @@
-import { useState } from 'react'
+﻿import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, CheckCircle, Search, ChevronDown } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle, Search, ChevronDown, Loader2 } from 'lucide-react'
+import { doc, setDoc } from 'firebase/firestore'
+import { db } from '../firebase/config'
+import { AuthContext } from '../contexts/AuthContext'
 
 export default function StudentEducation() {
   const navigate = useNavigate()
+  const auth = useContext(AuthContext)
+  const user = auth?.user ?? null
   const [form, setForm] = useState({
     level: '',
     college: 'ITM College Aligarh',
@@ -13,11 +18,31 @@ export default function StudentEducation() {
     year: '1st',
     graduationYear: '2026',
   })
+  const [saving, setSaving] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    sessionStorage.setItem('signupEducation', JSON.stringify(form))
-    navigate('/student-goals')
+    if (!user?.uid || !db) return
+    setSaving(true)
+    try {
+      await setDoc(doc(db, 'students', user.uid), {
+        education: {
+          level: form.level,
+          college: form.college,
+          university: form.university,
+          city: form.city,
+          state: form.state,
+          year: form.year,
+          graduationYear: form.graduationYear,
+        },
+        updatedAt: new Date().toISOString(),
+      }, { merge: true })
+      navigate('/onboarding/student/goals')
+    } catch {
+      navigate('/onboarding/student/goals')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -136,8 +161,8 @@ export default function StudentEducation() {
               />
             </div>
 
-            <button type="submit" className="senjr-btn senjr-btn-green" style={{ marginTop: 24 }}>
-              Continue →
+            <button type="submit" className="senjr-btn senjr-btn-green" style={{ marginTop: 24, opacity: saving ? 0.7 : 1 }} disabled={saving}>
+              {saving ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : <>Continue <ArrowRight size={18} /></>}
             </button>
           </form>
         </div>

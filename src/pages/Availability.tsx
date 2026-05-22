@@ -1,286 +1,133 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, ChevronDown, Check } from 'lucide-react'
+import { ArrowLeft, Sun, Moon, Save, Plus, X, Check, Clock } from 'lucide-react'
+
+const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+type DaySlots = { day: string; enabled: boolean; slots: { start: string; end: string }[] }
+
+const defaultSlots: DaySlots[] = daysOfWeek.map((day) => ({
+  day,
+  enabled: ['Sat', 'Sun'].includes(day) ? false : true,
+  slots: [{ start: '10:00', end: '12:00' }, { start: '14:00', end: '17:00' }],
+}))
+
+const timeOptions: { value: string; label: string }[] = []
+for (let h = 6; h <= 22; h++) {
+  for (let m = 0; m < 60; m += 30) {
+    const hour = h > 12 ? h - 12 : h
+    const ampm = h >= 12 ? 'PM' : 'AM'
+    const str = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+    const label = `${hour}:${String(m).padStart(2, '0')} ${ampm}`
+    timeOptions.push({ value: str, label })
+  }
+}
 
 export default function Availability() {
   const navigate = useNavigate()
-  const [selectedDay, setSelectedDay] = useState(1)
-  const [startTime, setStartTime] = useState({ h: 9, m: 0, ampm: 'AM' })
-  const [endTime] = useState({ h: 12, m: 0, ampm: 'PM' })
-  const [slotDuration, setSlotDuration] = useState(30)
-  const [buffer] = useState(5)
-  const [breakAfter] = useState(3)
-  const [breakDuration] = useState(10)
-  const [autoAccept, setAutoAccept] = useState(true)
-  const [repeatOption, setRepeatOption] = useState('weekly')
+  const [schedule, setSchedule] = useState<DaySlots[]>(defaultSlots)
+  const [saved, setSaved] = useState(false)
 
-  const days = [
-    { label: 'MON', date: 12 },
-    { label: 'TUE', date: 13 },
-    { label: 'WED', date: 14 },
-    { label: 'THU', date: 15 },
-    { label: 'FRI', date: 16 },
-    { label: 'SAT', date: 17 },
-  ]
+  const toggleDay = (index: number) => {
+    setSchedule(prev => prev.map((d, i) => i === index ? { ...d, enabled: !d.enabled } : d))
+    setSaved(false)
+  }
 
-  const generatedSlots = [
-    { start: '09:00 AM', end: '09:30 AM' },
-    { start: '09:35 AM', end: '10:05 AM' },
-    { start: '10:10 AM', end: '10:40 AM' },
-    { break: true, duration: '10 MIN BREAK' },
-    { start: '10:50 AM', end: '11:20 AM' },
-  ]
+  const addSlot = (dayIndex: number) => {
+    setSchedule(prev => prev.map((d, i) => i === dayIndex ? { ...d, slots: [...d.slots, { start: '14:00', end: '15:00' }] } : d))
+    setSaved(false)
+  }
+
+  const removeSlot = (dayIndex: number, slotIndex: number) => {
+    setSchedule(prev => prev.map((d, i) => i === dayIndex ? { ...d, slots: d.slots.filter((_, j) => j !== slotIndex) } : d))
+    setSaved(false)
+  }
+
+  const updateSlot = (dayIndex: number, slotIndex: number, field: 'start' | 'end', value: string) => {
+    setSchedule(prev => prev.map((d, i) => i === dayIndex ? { ...d, slots: d.slots.map((s, j) => j === slotIndex ? { ...s, [field]: value } : s) } : d))
+    setSaved(false)
+  }
+
+  const saveAvailability = () => {
+    localStorage.setItem('senjr_availability', JSON.stringify(schedule))
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+  }
 
   return (
     <div className="senjr-app">
-      <header className="senjr-header" style={{ background: 'var(--senjr-black)', color: 'white', border: 'none' }}>
-        <button className="senjr-header-back" style={{ borderColor: 'white', color: 'white' }} onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} />
-        </button>
-        <span className="senjr-header-title" style={{ color: 'white' }}>Availability Settings</span>
-        <button style={{ color: 'var(--senjr-green)', fontWeight: 600, fontSize: 14 }} onClick={() => navigate('/mentor-hub')}>
-          Save
-        </button>
+      <header className="senjr-header">
+        <button className="senjr-header-back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></button>
+        <span className="senjr-header-title">Set Availability</span>
+        <div />
       </header>
 
       <div className="senjr-page">
         <div className="senjr-content">
-          <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 12, textTransform: 'uppercase' }}>
-            Select Working Days
-          </p>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto' }}>
-            {days.map((d, i) => (
-              <button
-                key={d.label}
-                onClick={() => setSelectedDay(i)}
-                style={{
-                  minWidth: 48, padding: '8px 4px',
-                  borderRadius: 12, textAlign: 'center',
-                  background: selectedDay === i ? 'var(--senjr-green)' : 'var(--senjr-bg-card)',
-                  color: selectedDay === i ? 'white' : 'var(--senjr-text)',
-                  border: selectedDay === i ? 'none' : '1px solid var(--senjr-border)',
-                  cursor: 'pointer'
-                }}
-              >
-                <span style={{ fontSize: 10, display: 'block', marginBottom: 2 }}>{d.label}</span>
-                <span style={{ fontSize: 16, fontWeight: 700 }}>{d.date}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="senjr-card-flat" style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 12, textTransform: 'uppercase' }}>
-              Available From:
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-              <div style={{ textAlign: 'center' }}>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>+</button>
-                <span style={{ fontSize: 32, fontWeight: 800, color: 'var(--senjr-green)' }}>{String(startTime.h).padStart(2, '0')}</span>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>−</button>
+          <div className="senjr-card-neo-green" style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Clock size={22} style={{ color: 'var(--senjr-green-dark)' }} />
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Your Weekly Schedule</p>
+                <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Set when you're available for sessions</p>
               </div>
-              <span style={{ fontSize: 32, fontWeight: 800 }}>:</span>
-              <div style={{ textAlign: 'center' }}>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>+</button>
-                <span style={{ fontSize: 32, fontWeight: 800, color: 'var(--senjr-green)' }}>{String(startTime.m).padStart(2, '0')}</span>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>−</button>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <button
-                  style={{
-                    padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-                    background: startTime.ampm === 'AM' ? 'var(--senjr-green)' : 'var(--senjr-bg)',
-                    color: startTime.ampm === 'AM' ? 'white' : 'var(--senjr-text-muted)',
-                    border: 'none', cursor: 'pointer'
-                  }}
-                  onClick={() => setStartTime({ ...startTime, ampm: 'AM' })}
-                >AM</button>
-                <button
-                  style={{
-                    padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-                    background: startTime.ampm === 'PM' ? 'var(--senjr-green)' : 'var(--senjr-bg)',
-                    color: startTime.ampm === 'PM' ? 'white' : 'var(--senjr-text-muted)',
-                    border: 'none', cursor: 'pointer'
-                  }}
-                  onClick={() => setStartTime({ ...startTime, ampm: 'PM' })}
-                >PM</button>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 8 }}>
-              {['6AM', '9AM', '12PM', '3PM', '6PM'].map((t) => (
-                <button key={t} style={{
-                  padding: '4px 10px', borderRadius: 20, fontSize: 11,
-                  background: t === '9AM' ? 'var(--senjr-green-light)' : 'var(--senjr-bg)',
-                  color: t === '9AM' ? 'var(--senjr-green-dark)' : 'var(--senjr-text-muted)',
-                  border: 'none', cursor: 'pointer', fontWeight: 500
-                }}>{t}</button>
-              ))}
             </div>
           </div>
 
-          <div className="senjr-card-flat" style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 12, textTransform: 'uppercase' }}>
-              Available Until:
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-              <div style={{ textAlign: 'center' }}>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>+</button>
-                <span style={{ fontSize: 32, fontWeight: 800, color: '#1E40AF' }}>{String(endTime.h).padStart(2, '0')}</span>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>−</button>
-              </div>
-              <span style={{ fontSize: 32, fontWeight: 800 }}>:</span>
-              <div style={{ textAlign: 'center' }}>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>+</button>
-                <span style={{ fontSize: 32, fontWeight: 800, color: '#1E40AF' }}>{String(endTime.m).padStart(2, '0')}</span>
-                <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)', display: 'block' }}>−</button>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <button style={{
-                  padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-                  background: endTime.ampm === 'AM' ? '#1E40AF' : 'var(--senjr-bg)',
-                  color: endTime.ampm === 'AM' ? 'white' : 'var(--senjr-text-muted)',
-                  border: 'none', cursor: 'pointer'
-                }}>AM</button>
-                <button style={{
-                  padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-                  background: endTime.ampm === 'PM' ? '#1E40AF' : 'var(--senjr-bg)',
-                  color: endTime.ampm === 'PM' ? 'white' : 'var(--senjr-text-muted)',
-                  border: 'none', cursor: 'pointer'
-                }}>PM</button>
-              </div>
-            </div>
-            <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', textAlign: 'center', marginTop: 8 }}>
-              Defaulting to 3 hours after start time.
-            </p>
-          </div>
-
-          <div className="senjr-card-flat" style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 12 }}>
-              Slot Duration (Min)
-            </p>
-            <div className="senjr-chip-group">
-              {[15, 30, 45, 60].map((d) => (
-                <button
-                  key={d}
-                  className={`senjr-chip ${slotDuration === d ? 'senjr-chip-active' : ''}`}
-                  onClick={() => setSlotDuration(d)}
-                  style={{ fontSize: 13, padding: '6px 14px' }}
-                >
-                  {d}
-                </button>
-              ))}
-              <button className="senjr-chip" style={{ fontSize: 13, padding: '6px 14px' }}>Custom</button>
-            </div>
-          </div>
-
-          <div className="senjr-grid-2" style={{ marginBottom: 16 }}>
-            <div className="senjr-card-flat" style={{ marginBottom: 0 }}>
-              <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginBottom: 4 }}>Buffer</p>
-              <select className="senjr-input" style={{ fontSize: 13, padding: '8px 12px' }} value={buffer} disabled>
-                <option value={5}>5 min</option>
-                <option value={10}>10 min</option>
-                <option value={15}>15 min</option>
-              </select>
-            </div>
-            <div className="senjr-card-flat" style={{ marginBottom: 0 }}>
-              <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginBottom: 4 }}>Break After</p>
-              <select className="senjr-input" style={{ fontSize: 13, padding: '8px 12px' }} value={breakAfter} disabled>
-                <option value={2}>2 slots</option>
-                <option value={3}>3 slots</option>
-                <option value={4}>4 slots</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="senjr-card-flat" style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginBottom: 4 }}>Break Duration</p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-              <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)' }}>−</button>
-              <span style={{ fontSize: 18, fontWeight: 700 }}>{breakDuration} min</span>
-              <button style={{ fontSize: 18, color: 'var(--senjr-text-muted)' }}>+</button>
-            </div>
-          </div>
-
-          <div className="senjr-card-flat" style={{ background: 'var(--senjr-green-bg)', borderColor: 'var(--senjr-green-light)', marginBottom: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-green-dark)', marginBottom: 12 }}>
-              Generated Slots:
-            </p>
-            {generatedSlots.map((slot, i) => (
-              slot.break ? (
-                <p key={i} style={{ textAlign: 'center', fontSize: 12, color: 'var(--senjr-orange)', fontWeight: 600, padding: '8px 0' }}>
-                  ⏸ {slot.duration}
-                </p>
-              ) : (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '8px 12px', background: 'white', borderRadius: 8, marginBottom: 6
-                }}>
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>{slot.start} - {slot.end}</span>
-                  <Check size={16} style={{ color: 'var(--senjr-green)' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {schedule.map((day, dayIndex) => (
+              <div key={day.day} className="senjr-card-neo" style={{ background: day.enabled ? 'white' : 'var(--senjr-bg)', opacity: day.enabled ? 1 : 0.6, border: day.enabled ? '2px solid var(--senjr-text)' : '2px solid var(--senjr-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: day.enabled && day.slots.length > 0 ? 12 : 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <button onClick={() => toggleDay(dayIndex)} style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${day.enabled ? 'var(--senjr-green)' : 'var(--senjr-border)'}`, background: day.enabled ? 'var(--senjr-green)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', transition: 'all 0.15s' }}>
+                      {day.enabled && <Check size={14} />}
+                    </button>
+                    <span style={{ fontSize: 15, fontWeight: 600 }}>{day.day}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {day.day === 'Sat' || day.day === 'Sun' ? <Moon size={14} style={{ color: 'var(--senjr-text-muted)' }} /> : <Sun size={14} style={{ color: 'var(--senjr-orange)' }} />}
+                    <span style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>{day.enabled ? `${day.slots.length} slot${day.slots.length > 1 ? 's' : ''}` : 'Off'}</span>
+                  </div>
                 </div>
-              )
-            ))}
-          </div>
 
-          <div className="senjr-card-flat" style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Advanced Options</span>
-              <ChevronDown size={18} style={{ color: 'var(--senjr-text-muted)' }} />
-            </div>
-          </div>
+                {day.enabled && day.slots.map((slot, slotIndex) => (
+                  <div key={slotIndex} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <select value={slot.start} onChange={(e) => updateSlot(dayIndex, slotIndex, 'start', e.target.value)}
+                      style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--senjr-border)', background: 'var(--senjr-bg)', fontSize: 13, color: 'var(--senjr-text)' }}>
+                      {timeOptions.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    </select>
+                    <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>to</span>
+                    <select value={slot.end} onChange={(e) => updateSlot(dayIndex, slotIndex, 'end', e.target.value)}
+                      style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--senjr-border)', background: 'var(--senjr-bg)', fontSize: 13, color: 'var(--senjr-text)' }}>
+                      {timeOptions.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    </select>
+                    <button onClick={() => removeSlot(dayIndex, slotIndex)} style={{ padding: 6, background: '#FEE2E2', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#DC2626' }}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
 
-          <div className="senjr-card-flat" style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, fontWeight: 500 }}>Auto-accept Bookings</span>
-              <button
-                onClick={() => setAutoAccept(!autoAccept)}
-                style={{
-                  width: 48, height: 28, borderRadius: 14,
-                  background: autoAccept ? 'var(--senjr-green)' : 'var(--senjr-border)',
-                  position: 'relative', transition: 'background 0.2s', border: 'none', cursor: 'pointer'
-                }}
-              >
-                <div style={{
-                  width: 22, height: 22, borderRadius: '50%',
-                  background: 'white',
-                  position: 'absolute',
-                  top: 3,
-                  left: autoAccept ? 23 : 3,
-                  transition: 'left 0.2s',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                }} />
-              </button>
-            </div>
-          </div>
-
-          <div className="senjr-card-flat" style={{ marginBottom: 24 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 12, textTransform: 'uppercase' }}>
-              Repeating Options
-            </p>
-            {[
-              { id: 'weekly', label: 'Repeat every week' },
-              { id: 'biweekly', label: 'Repeat every 2 weeks' },
-              { id: 'custom', label: 'Custom' },
-            ].map((opt) => (
-              <div key={opt.id} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 0', borderBottom: '1px solid var(--senjr-border)'
-              }}>
-                <span style={{ fontSize: 14 }}>{opt.label}</span>
-                <div style={{
-                  width: 20, height: 20, borderRadius: '50%',
-                  border: `2px solid ${repeatOption === opt.id ? 'var(--senjr-green)' : 'var(--senjr-border)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer'
-                }} onClick={() => setRepeatOption(opt.id)}>
-                  {repeatOption === opt.id && <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--senjr-green)' }} />}
-                </div>
+                {day.enabled && (
+                  <button onClick={() => addSlot(dayIndex)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 0', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--senjr-green)', fontSize: 12, fontWeight: 600 }}>
+                    <Plus size={14} /> Add Slot
+                  </button>
+                )}
               </div>
             ))}
           </div>
 
-          <button className="senjr-btn senjr-btn-green">
-            <Save size={18} /> Save Availability
-          </button>
+          <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+            <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white', flex: 1 }} onClick={saveAvailability}>
+              <Save size={16} /> {saved ? 'Saved!' : 'Save Availability'}
+            </button>
+            <button className="senjr-btn" style={{ background: 'transparent', color: 'var(--senjr-text)', border: '1px solid var(--senjr-border)', width: 'auto' }} onClick={() => navigate(-1)}>Cancel</button>
+          </div>
+
+          {saved && (
+            <div style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', padding: '12px 24px', background: 'var(--senjr-green)', color: 'white', borderRadius: 12, fontWeight: 600, fontSize: 14, boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 100 }}>
+              <Check size={16} style={{ display: 'inline', marginRight: 8 }} /> Schedule saved successfully!
+            </div>
+          )}
         </div>
       </div>
     </div>

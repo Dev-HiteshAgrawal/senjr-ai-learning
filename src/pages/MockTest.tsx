@@ -1,526 +1,186 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Clock, CheckCircle, XCircle, Trophy, TrendingUp, AlertCircle, Home, BookOpen, User, Target, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Clock, CheckCircle, Flag, AlertTriangle, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react'
+
+const questions = [
+  { id: 1, text: 'What is the derivative of sin(x)?', options: ['cos(x)', '-cos(x)', 'sin(x)', '-sin(x)'], correct: 0, topic: 'Calculus' },
+  { id: 2, text: 'Which of the following is a prime number?', options: ['21', '23', '25', '27'], correct: 1, topic: 'Number Theory' },
+  { id: 3, text: 'What is the chemical symbol for gold?', options: ['Go', 'Gd', 'Au', 'Ag'], correct: 2, topic: 'Chemistry' },
+  { id: 4, text: 'What is the SI unit of force?', options: ['Joule', 'Newton', 'Watt', 'Pascal'], correct: 1, topic: 'Physics' },
+  { id: 5, text: 'Which gas is most abundant in Earth\'s atmosphere?', options: ['Oxygen', 'Carbon Dioxide', 'Nitrogen', 'Argon'], correct: 2, topic: 'Environmental Science' },
+]
 
 export default function MockTest() {
   const navigate = useNavigate()
-  const [view, setView] = useState<'select' | 'test' | 'result'>('select')
-  const [selectedExam, setSelectedExam] = useState('')
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, number>>({})
-  const [timeLeft, setTimeLeft] = useState(3600)
-  const [testStarted, setTestStarted] = useState(false)
+  const [currentQ, setCurrentQ] = useState(0)
+  const [answers, setAnswers] = useState<number[]>([])
+  const [flagged, setFlagged] = useState<number[]>([])
+  const [timeLeft] = useState(3600)
+  const [submitted, setSubmitted] = useState(false)
+  const [started, setStarted] = useState(false)
 
-  const exams = [
-    {
-      id: 'up-police',
-      name: 'UP Police Constable',
-      questions: 25,
-      duration: '60 min',
-      difficulty: 'Medium',
-      icon: 'shield',
-      color: 'var(--senjr-green)',
-      bg: 'var(--senjr-green-bg)',
-    },
-    {
-      id: 'ssc-cgl',
-      name: 'SSC CGL Tier 1',
-      questions: 25,
-      duration: '60 min',
-      difficulty: 'Hard',
-      icon: 'trophy',
-      color: 'var(--senjr-orange)',
-      bg: 'var(--senjr-orange-bg)',
-    },
-    {
-      id: 'jee-maths',
-      name: 'JEE Maths Topic Test',
-      questions: 15,
-      duration: '30 min',
-      difficulty: 'Hard',
-      icon: 'target',
-      color: '#3B82F6',
-      bg: '#EFF6FF',
-    },
-    {
-      id: 'bba-entrance',
-      name: 'BBA Entrance Mock',
-      questions: 20,
-      duration: '45 min',
-      difficulty: 'Easy',
-      icon: 'book',
-      color: '#8B5CF6',
-      bg: '#F5F3FF',
-    },
-  ]
-
-  const sampleQuestions = [
-    {
-      id: 1,
-      question: 'If the ratio of two numbers is 3:5 and their sum is 48, what is the larger number?',
-      options: ['20', '25', '30', '35'],
-      correct: 2,
-      subject: 'Maths',
-      explanation: 'Ratio 3:5 means parts = 3x + 5x = 8x = 48, so x = 6. Larger number = 5x = 30.',
-    },
-    {
-      id: 2,
-      question: 'Which article of the Indian Constitution deals with the Right to Equality?',
-      options: ['Article 14-18', 'Article 19-22', 'Article 23-24', 'Article 25-28'],
-      correct: 0,
-      subject: 'GK',
-      explanation: 'Articles 14-18 deal with Right to Equality including equality before law, prohibition of discrimination, etc.',
-    },
-    {
-      id: 3,
-      question: 'Find the next number in the series: 2, 6, 12, 20, 30, ?',
-      options: ['40', '42', '44', '46'],
-      correct: 1,
-      subject: 'Reasoning',
-      explanation: 'Differences: 4, 6, 8, 10, 12. So next = 30 + 12 = 42.',
-    },
-    {
-      id: 4,
-      question: 'The capital of Uttar Pradesh is:',
-      options: ['Lucknow', 'Kanpur', 'Agra', 'Varanasi'],
-      correct: 0,
-      subject: 'GK',
-      explanation: 'Lucknow is the capital of Uttar Pradesh.',
-    },
-    {
-      id: 5,
-      question: 'If x² - 5x + 6 = 0, what are the roots?',
-      options: ['2, 3', '1, 6', '-2, -3', '-1, -6'],
-      correct: 0,
-      subject: 'Maths',
-      explanation: 'x² - 5x + 6 = (x-2)(x-3) = 0, so roots are 2 and 3.',
-    },
-  ]
-
-  const previousAttempts = [
-    { exam: 'UP Police Set 10', score: '18/25', percent: 72, date: '2 days ago' },
-    { exam: 'UP Police Set 9', score: '15/25', percent: 60, date: '5 days ago' },
-    { exam: 'SSC CGL Mock 3', score: '20/25', percent: 80, date: '1 week ago' },
-  ]
-
-  useEffect(() => {
-    if (view === 'test' && testStarted) {
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer)
-            setView('result')
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-      return () => clearInterval(timer)
-    }
-  }, [view, testStarted])
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  const selectAnswer = (optionIndex: number) => {
+    const newAnswers = [...answers]; newAnswers[currentQ] = optionIndex; setAnswers(newAnswers)
   }
 
-  const handleStartTest = (examId: string) => {
-    setSelectedExam(examId)
-    setCurrentQuestion(0)
-    setAnswers({})
-    setTimeLeft(3600)
-    setTestStarted(true)
-    setView('test')
+  const toggleFlag = () => {
+    setFlagged((prev) => prev.includes(currentQ) ? prev.filter((f) => f !== currentQ) : [...prev, currentQ])
   }
 
-  const handleAnswer = (optionIndex: number) => {
-    setAnswers({ ...answers, [currentQuestion]: optionIndex })
-  }
+  const submitTest = () => { setSubmitted(true) }
 
-  const handleNext = () => {
-    if (currentQuestion < sampleQuestions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
-    } else {
-      setView('result')
-    }
-  }
+  const correctCount = submitted ? questions.filter((q, i) => answers[i] === q.correct).length : 0
 
-  const handlePrev = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
-    }
-  }
-
-  const getScore = () => {
-    let correct = 0
-    sampleQuestions.forEach((q, i) => {
-      if (answers[i] === q.correct) correct++
-    })
-    return correct
-  }
-
-  const score = getScore()
-  const totalQuestions = sampleQuestions.length
-  const percentage = Math.round((score / totalQuestions) * 100)
-
-  if (view === 'result') {
+  if (!started) {
     return (
       <div className="senjr-app">
         <header className="senjr-header">
-          <button className="senjr-header-back" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft size={18} />
-          </button>
-          <span className="senjr-header-title">Test Result</span>
-          <div style={{ width: 36 }} />
+          <button className="senjr-header-back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></button>
+          <span className="senjr-header-title">Mock Test</span>
+          <div />
         </header>
-
         <div className="senjr-page">
-          <div className="senjr-content">
-            <div style={{
-              background: percentage >= 70 ? 'var(--senjr-green-bg)' : percentage >= 50 ? 'var(--senjr-orange-bg)' : '#FEF2F2',
-              borderRadius: 16,
-              padding: 24,
-              textAlign: 'center',
-              marginBottom: 20,
-              border: '2px solid var(--senjr-text)',
-              boxShadow: '3px 3px 0 var(--senjr-text)',
-            }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: '50%',
-                background: percentage >= 70 ? 'var(--senjr-green)' : percentage >= 50 ? 'var(--senjr-orange)' : '#EF4444',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 16px',
-                border: '3px solid var(--senjr-text)',
-              }}>
-                <Trophy size={36} style={{ color: 'white' }} />
+          <div className="senjr-content" style={{ textAlign: 'center', paddingTop: 60 }}>
+            <div style={{ width: 80, height: 80, borderRadius: 20, background: 'var(--senjr-orange-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <BarChart3 size={36} style={{ color: 'var(--senjr-orange)' }} />
+            </div>
+            <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Weekly Mock Test</h2>
+            <p style={{ color: 'var(--senjr-text-muted)', marginBottom: 16 }}>Topic: Mathematics, Physics & Chemistry</p>
+            <div className="senjr-card" style={{ border: '1px solid var(--senjr-border)', marginBottom: 20, textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Questions</span>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>{questions.length}</span>
               </div>
-              <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>
-                {percentage >= 70 ? 'Great Job! ' : percentage >= 50 ? 'Good Effort! ' : 'Keep Practicing! '}
-              </h1>
-              <p style={{ fontSize: 16, color: 'var(--senjr-text-muted)', marginBottom: 16 }}>
-                You scored {score}/{totalQuestions}
-              </p>
-              <div style={{
-                width: 120, height: 120, borderRadius: '50%',
-                border: `8px solid ${percentage >= 70 ? 'var(--senjr-green)' : percentage >= 50 ? 'var(--senjr-orange)' : '#EF4444'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto',
-                background: 'white',
-              }}>
-                <span style={{ fontSize: 32, fontWeight: 800 }}>{percentage}%</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Duration</span>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>60 min</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Marking</span>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>+4, -1</span>
               </div>
             </div>
-
-            <div className="senjr-grid-2" style={{ marginBottom: 20 }}>
-              <div className="senjr-card-flat" style={{ textAlign: 'center', padding: 16, marginBottom: 0, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
-                <CheckCircle size={24} style={{ color: 'var(--senjr-green)', margin: '0 auto 8px' }} />
-                <span className="senjr-stat-value" style={{ fontSize: 24, color: 'var(--senjr-green)' }}>{score}</span>
-                <span className="senjr-stat-label">Correct</span>
-              </div>
-              <div className="senjr-card-flat" style={{ textAlign: 'center', padding: 16, marginBottom: 0, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
-                <XCircle size={24} style={{ color: '#EF4444', margin: '0 auto 8px' }} />
-                <span className="senjr-stat-value" style={{ fontSize: 24, color: '#EF4444' }}>{totalQuestions - score}</span>
-                <span className="senjr-stat-label">Wrong</span>
-              </div>
-            </div>
-
-            <div className="senjr-card-flat" style={{ marginBottom: 20, border: '2px solid var(--senjr-text)', boxShadow: '2px 2px 0 var(--senjr-text)' }}>
-              <h3 className="senjr-section-title" style={{ fontSize: 16 }}>Question Review</h3>
-              {sampleQuestions.map((q, i) => {
-                const isCorrect = answers[i] === q.correct
-                return (
-                  <div key={i} style={{
-                    padding: '12px',
-                    borderRadius: 10,
-                    marginBottom: i < sampleQuestions.length - 1 ? 8 : 0,
-                    background: isCorrect ? 'var(--senjr-green-bg)' : '#FEF2F2',
-                    border: `1px solid ${isCorrect ? 'var(--senjr-green-light)' : '#FECACA'}`,
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                      {isCorrect ? (
-                        <CheckCircle size={16} style={{ color: 'var(--senjr-green)' }} />
-                      ) : (
-                        <XCircle size={16} style={{ color: '#EF4444' }} />
-                      )}
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>Q{i + 1}: {q.subject}</span>
-                    </div>
-                    <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 4 }}>{q.question}</p>
-                    {!isCorrect && (
-                      <p style={{ fontSize: 12, color: 'var(--senjr-green-dark)', fontWeight: 500 }}>
-                        Correct: {q.options[q.correct]}
-                      </p>
-                    )}
-                    <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginTop: 4 }}>
-                      {q.explanation}
-                    </p>
-                  </div>
-                )
-              })}
-            </div>
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button className="senjr-btn senjr-btn-outline" onClick={() => navigate('/dashboard')}>
-                <Home size={18} /> Dashboard
-              </button>
-              <button className="senjr-btn senjr-btn-green" onClick={() => handleStartTest(selectedExam)}>
-                <TrendingUp size={18} /> Retry Test
-              </button>
-            </div>
+            <button className="senjr-btn" style={{ background: 'var(--senjr-orange)', color: 'white', width: '100%' }} onClick={() => setStarted(true)}>Start Test</button>
           </div>
         </div>
       </div>
     )
   }
 
-  if (view === 'test') {
-    const question = sampleQuestions[currentQuestion]
-    const progress = ((currentQuestion + 1) / sampleQuestions.length) * 100
-
+  if (submitted) {
+    const percentage = Math.round((correctCount / questions.length) * 100)
     return (
       <div className="senjr-app">
-        <header className="senjr-header" style={{ background: 'var(--senjr-black)', color: 'white', border: 'none' }}>
-          <button className="senjr-header-back" style={{ borderColor: '#334155', color: 'white' }} onClick={() => setView('select')}>
-            <ArrowLeft size={18} />
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Clock size={16} style={{ color: timeLeft < 300 ? '#EF4444' : 'var(--senjr-green)' }} />
-            <span style={{ fontSize: 16, fontWeight: 700, color: timeLeft < 300 ? '#EF4444' : 'white' }}>
-              {formatTime(timeLeft)}
-            </span>
-          </div>
-          <button style={{ color: 'var(--senjr-orange)', fontWeight: 600, fontSize: 13, background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setView('result')}>
-            Submit
-          </button>
+        <header className="senjr-header">
+          <button className="senjr-header-back" onClick={() => navigate('/dashboard')}><ArrowLeft size={18} /></button>
+          <span className="senjr-header-title">Results</span>
+          <div />
         </header>
-
         <div className="senjr-page">
-          <div className="senjr-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>
-                Question {currentQuestion + 1} of {sampleQuestions.length}
-              </span>
-              <span className="senjr-badge senjr-badge-green">{question.subject}</span>
+          <div className="senjr-content" style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ width: 100, height: 100, borderRadius: '50%', background: percentage >= 70 ? 'var(--senjr-green-light)' : 'var(--senjr-orange-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <span style={{ fontSize: 32, fontWeight: 800, color: percentage >= 70 ? 'var(--senjr-green)' : 'var(--senjr-orange)' }}>{percentage}%</span>
             </div>
+            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+              {percentage >= 80 ? 'Outstanding!' : percentage >= 60 ? 'Good Job!' : 'Keep Practicing'}
+            </h2>
+            <p style={{ color: 'var(--senjr-text-muted)', marginBottom: 24 }}>{correctCount}/{questions.length} correct answers</p>
 
-            <div className="senjr-progress-bar" style={{ marginBottom: 20 }}>
-              <div className="senjr-progress-fill" style={{ width: `${progress}%` }} />
-            </div>
-
-            <div className="senjr-card" style={{ marginBottom: 20 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.5 }}>{question.question}</h2>
-            </div>
-
-            {question.options.map((opt, i) => (
-              <button
-                key={i}
-                onClick={() => handleAnswer(i)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  width: '100%',
-                  padding: '14px 16px',
-                  marginBottom: 10,
-                  borderRadius: 12,
-                  border: answers[currentQuestion] === i ? '2px solid var(--senjr-green)' : '2px solid var(--senjr-text)',
-                  background: answers[currentQuestion] === i ? 'var(--senjr-green-bg)' : 'white',
-                  cursor: 'pointer',
-                  boxShadow: answers[currentQuestion] === i ? '2px 2px 0 var(--senjr-green)' : '2px 2px 0 var(--senjr-text)',
-                }}
-              >
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  border: `2px solid ${answers[currentQuestion] === i ? 'var(--senjr-green)' : 'var(--senjr-border)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: answers[currentQuestion] === i ? 'var(--senjr-green)' : 'white',
-                  color: answers[currentQuestion] === i ? 'white' : 'var(--senjr-text-muted)',
-                  fontSize: 13, fontWeight: 600,
-                }}>
-                  {String.fromCharCode(65 + i)}
-                </div>
-                <span style={{ fontSize: 15, fontWeight: 500 }}>{opt}</span>
-              </button>
-            ))}
-
-            <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-              <button
-                className="senjr-btn senjr-btn-outline"
-                style={{ flex: 1 }}
-                onClick={handlePrev}
-                disabled={currentQuestion === 0}
-              >
-                Previous
-              </button>
-              <button
-                className="senjr-btn senjr-btn-green"
-                style={{ flex: 1 }}
-                onClick={handleNext}
-              >
-                {currentQuestion === sampleQuestions.length - 1 ? 'Submit' : 'Next'} <ChevronRight size={18} />
-              </button>
-            </div>
-
-            <div style={{ marginTop: 20 }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8 }}>Question Navigator</p>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {sampleQuestions.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentQuestion(i)}
-                    style={{
-                      width: 36, height: 36, borderRadius: 8,
-                      border: '2px solid var(--senjr-text)',
-                      background: i === currentQuestion ? 'var(--senjr-green)' : answers[i] !== undefined ? 'var(--senjr-green-bg)' : 'white',
-                      color: i === currentQuestion ? 'white' : 'var(--senjr-text)',
-                      fontSize: 13, fontWeight: 600,
-                      cursor: 'pointer',
-                      boxShadow: i === currentQuestion ? 'none' : '2px 2px 0 var(--senjr-text)',
-                    }}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
+            <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+              <div className="senjr-card" style={{ flex: 1, textAlign: 'center', border: '1px solid var(--senjr-green-light)' }}>
+                <CheckCircle size={20} style={{ color: 'var(--senjr-green)', margin: '0 auto 4px' }} />
+                <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--senjr-green)' }}>{correctCount}</p>
+                <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>Correct</p>
+              </div>
+              <div className="senjr-card" style={{ flex: 1, textAlign: 'center', border: '1px solid #FCA5A5' }}>
+                <AlertTriangle size={20} style={{ color: '#EF4444', margin: '0 auto 4px' }} />
+                <p style={{ fontSize: 22, fontWeight: 800, color: '#EF4444' }}>{questions.length - correctCount}</p>
+                <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>Incorrect</p>
               </div>
             </div>
+
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8, textAlign: 'left' }}>Review Questions</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {questions.map((q, i) => (
+                <div key={q.id} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--senjr-border)' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, background: answers[i] === q.correct ? 'var(--senjr-green-light)' : '#FEE2E2', color: answers[i] === q.correct ? 'var(--senjr-green)' : '#EF4444' }}>
+                    {answers[i] === q.correct ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 13, fontWeight: 500 }}>Question {i + 1}</p>
+                    <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>{q.topic}</p>
+                  </div>
+                  <span className="senjr-badge" style={{ background: 'var(--senjr-bg)', color: 'var(--senjr-text-muted)' }}>{q.correct === answers[i] ? 'Correct' : 'Wrong'}</span>
+                </div>
+              ))}
+            </div>
+
+            <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white', marginTop: 20 }} onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
           </div>
         </div>
       </div>
     )
   }
+
+  const q = questions[currentQ]
+  const answeredCount = answers.filter((a) => a !== undefined).length
+  const hours = Math.floor(timeLeft / 3600)
+  const minutes = Math.floor((timeLeft % 3600) / 60)
+  const seconds = timeLeft % 60
 
   return (
     <div className="senjr-app">
       <header className="senjr-header">
-        <button className="senjr-header-back" onClick={() => navigate('/dashboard')}>
-          <ArrowLeft size={18} />
-        </button>
-        <span className="senjr-header-title">Mock Tests</span>
-        <button className="senjr-btn-icon">
-          <Target size={18} />
-        </button>
+        <button className="senjr-header-back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></button>
+        <span className="senjr-header-title" style={{ fontSize: 14 }}>Mock Test</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--senjr-orange)' }}>
+          <Clock size={14} /> {String(hours).padStart(2, '0')}:{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+        </div>
       </header>
 
       <div className="senjr-page">
         <div className="senjr-content">
-          <div style={{ marginBottom: 20 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Practice Tests</h1>
-            <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>Simulate real exam conditions</p>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 20 }}>
+            {questions.map((_, i) => (
+              <div key={i} onClick={() => setCurrentQ(i)} style={{ flex: 1, height: 4, borderRadius: 2, background: flagged.includes(i) ? 'var(--senjr-orange)' : answers[i] !== undefined ? 'var(--senjr-green)' : 'var(--senjr-border)', cursor: 'pointer', opacity: currentQ === i ? 1 : 0.6 }} />
+            ))}
           </div>
 
-          <div className="senjr-card-green" style={{ marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Trophy size={24} style={{ color: 'var(--senjr-green)' }} />
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 600 }}>Your Best Score</p>
-                <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--senjr-green-dark)' }}>80%</p>
-                <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>SSC CGL Mock 3 • 1 week ago</p>
-              </div>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Question {currentQ + 1} of {questions.length}</span>
+            <span className="senjr-badge" style={{ background: 'var(--senjr-bg)', color: 'var(--senjr-text-muted)' }}>{q.topic}</span>
           </div>
 
-          <h2 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 12 }}>Available Tests</h2>
-          {exams.map((exam) => (
-            <button
-              key={exam.id}
-              className="senjr-card-flat"
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                marginBottom: 12,
-                cursor: 'pointer',
-                border: '2px solid var(--senjr-text)',
-                boxShadow: '2px 2px 0 var(--senjr-text)',
-                background: exam.bg,
-              }}
-              onClick={() => handleStartTest(exam.id)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 12,
-                  background: 'white',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: '2px solid var(--senjr-border)',
-                }}>
-                  {exam.icon === 'shield' && <AlertCircle size={24} style={{ color: exam.color }} />}
-                  {exam.icon === 'trophy' && <Trophy size={24} style={{ color: exam.color }} />}
-                  {exam.icon === 'target' && <Target size={24} style={{ color: exam.color }} />}
-                  {exam.icon === 'book' && <BookOpen size={24} style={{ color: exam.color }} />}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700 }}>{exam.name}</h3>
-                  <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
-                    <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{exam.questions} Questions</span>
-                    <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{exam.duration}</span>
-                    <span style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: exam.difficulty === 'Easy' ? 'var(--senjr-green)' : exam.difficulty === 'Medium' ? 'var(--senjr-orange)' : '#EF4444',
-                    }}>{exam.difficulty}</span>
-                  </div>
-                </div>
-                <ChevronRight size={20} style={{ color: 'var(--senjr-text-muted)' }} />
-              </div>
-            </button>
-          ))}
-
-          <h2 className="senjr-section-title" style={{ fontSize: 16, marginTop: 24, marginBottom: 12 }}>Previous Attempts</h2>
-          {previousAttempts.map((attempt, i) => (
-            <div key={i} className="senjr-card-flat" style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              marginBottom: 8,
-              border: '1px solid var(--senjr-border)',
-            }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: 10,
-                background: attempt.percent >= 70 ? 'var(--senjr-green-bg)' : attempt.percent >= 50 ? 'var(--senjr-orange-bg)' : '#FEF2F2',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ fontSize: 16, fontWeight: 700, color: attempt.percent >= 70 ? 'var(--senjr-green)' : attempt.percent >= 50 ? 'var(--senjr-orange)' : '#EF4444' }}>
-                  {attempt.percent}%
+          <div className="senjr-card" style={{ marginBottom: 20, padding: 20 }}>
+            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 20, lineHeight: 1.5 }}>{q.text}</p>
+            {q.options.map((opt, i) => (
+              <button key={i} onClick={() => selectAnswer(i)}
+                style={{ display: 'block', width: '100%', padding: '14px 16px', marginBottom: 10, borderRadius: 12, textAlign: 'left', fontSize: 14, background: answers[currentQ] === i ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'var(--senjr-bg)', color: 'var(--senjr-text)', border: answers[currentQ] === i ? '1.5px solid var(--senjr-green)' : '1.5px solid var(--senjr-border)', cursor: 'pointer', transition: 'all 0.15s' }}>
+                <span style={{ display: 'inline-block', width: 22, height: 22, borderRadius: '50%', textAlign: 'center', lineHeight: '22px', fontSize: 12, fontWeight: 700, marginRight: 12, background: answers[currentQ] === i ? 'var(--senjr-green)' : 'var(--senjr-border)', color: answers[currentQ] === i ? 'white' : 'var(--senjr-text-muted)' }}>
+                  {String.fromCharCode(65 + i)}
                 </span>
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 14, fontWeight: 600 }}>{attempt.exam}</p>
-                <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{attempt.score} • {attempt.date}</p>
-              </div>
-              <button
-                className="senjr-btn senjr-btn-sm"
-                style={{
-                  padding: '6px 12px',
-                  background: 'var(--senjr-green)',
-                  color: 'white',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  border: 'none',
-                }}
-                onClick={() => handleStartTest('up-police')}
-              >
-                Retry
+                {opt}
               </button>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+            <button onClick={() => setCurrentQ(Math.max(0, currentQ - 1))} disabled={currentQ === 0} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '10px 16px', borderRadius: 8, background: 'transparent', border: '1px solid var(--senjr-border)', color: currentQ === 0 ? 'var(--senjr-text-light)' : 'var(--senjr-text)', cursor: currentQ === 0 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
+              <ChevronLeft size={16} /> Previous
+            </button>
+            <button onClick={toggleFlag} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 8, background: flagged.includes(currentQ) ? '#FEF3C7' : 'transparent', border: `1px solid ${flagged.includes(currentQ) ? '#F59E0B' : 'var(--senjr-border)'}`, color: flagged.includes(currentQ) ? '#D97706' : 'var(--senjr-text)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+              <Flag size={14} /> {flagged.includes(currentQ) ? 'Flagged' : 'Flag'}
+            </button>
+            <button onClick={() => setCurrentQ(Math.min(questions.length - 1, currentQ + 1))} disabled={currentQ === questions.length - 1} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '10px 16px', borderRadius: 8, background: 'transparent', border: '1px solid var(--senjr-border)', color: currentQ === questions.length - 1 ? 'var(--senjr-text-light)' : 'var(--senjr-text)', cursor: currentQ === questions.length - 1 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
+              Next <ChevronRight size={16} />
+            </button>
+          </div>
+
+          <button className="senjr-btn" style={{ background: 'var(--senjr-orange)', color: 'white', opacity: answeredCount === questions.length ? 1 : 0.6 }} onClick={submitTest} disabled={answeredCount < questions.length}>
+            Submit Test ({answeredCount}/{questions.length} answered)
+          </button>
         </div>
       </div>
-
-      <nav className="senjr-bottom-nav">
-        <button className="senjr-nav-item" onClick={() => navigate('/dashboard')}>
-          <Home size={20} />
-          Home
-        </button>
-        <button className="senjr-nav-item" onClick={() => navigate('/courses')}>
-          <BookOpen size={20} />
-          Learn
-        </button>
-        <button className="senjr-nav-item senjr-nav-item-active">
-          <Target size={20} />
-          Tests
-        </button>
-        <button className="senjr-nav-item" onClick={() => navigate('/profile')}>
-          <User size={20} />
-          Profile
-        </button>
-      </nav>
     </div>
   )
 }

@@ -1,251 +1,118 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Camera } from 'lucide-react'
+import { ArrowRight, Plus, X, Loader2 } from 'lucide-react'
+import { AuthContext } from '../contexts/AuthContext'
+
+const expertiseOptions = [
+  'Machine Learning', 'Deep Learning', 'Python', 'JavaScript', 'React', 'Node.js',
+  'Data Science', 'DSA', 'System Design', 'Web Development', 'Mobile Development',
+  'AI', 'NLP', 'Computer Vision', 'Cloud Computing', 'DevOps', 'Blockchain',
+  'Physics', 'Chemistry', 'Mathematics', 'Biology', 'English', 'French',
+  'JEE Preparation', 'NEET Preparation', 'GATE Preparation', 'UPSC Preparation',
+  'Communication Skills', 'Interview Prep', 'Career Guidance', 'Resume Review',
+]
 
 export default function MentorProfile() {
   const navigate = useNavigate()
-  const [subjects, setSubjects] = useState<string[]>(['BBA', 'Economics', 'English'])
-  const [languages, setLanguages] = useState<string[]>(['English', 'Hinglish'])
-  const [experience, setExperience] = useState('Fresher')
-  const [hourlyRate, setHourlyRate] = useState(250)
+  const auth = useContext(AuthContext)
+  const user = auth?.user ?? null
+  const [skills, setSkills] = useState<string[]>([])
+  const [skillInput, setSkillInput] = useState('')
+  const [hourlyRate, setHourlyRate] = useState(300)
   const [bio, setBio] = useState('')
-  const [teachingStyle, setTeachingStyle] = useState<string[]>(['Exam-focused', 'Doubt-solving'])
-  const [availability, setAvailability] = useState({
-    mon: { am: false, pm: true },
-    tue: { am: false, pm: true },
-    wed: { am: false, pm: true },
-    thu: { am: true, pm: true },
-    fri: { am: true, pm: true },
-    sat: { am: true, pm: true },
-    sun: { am: false, pm: false },
-  })
+  const [loading, setLoading] = useState(false)
 
-  const toggleSubject = (s: string) => {
-    if (subjects.includes(s)) setSubjects(subjects.filter((i) => i !== s))
-    else setSubjects([...subjects, s])
+  const addSkill = (skill: string) => {
+    if (skill && !skills.includes(skill)) setSkills(prev => [...prev, skill])
+    setSkillInput('')
   }
 
-  const toggleLanguage = (l: string) => {
-    if (languages.includes(l)) setLanguages(languages.filter((i) => i !== l))
-    else setLanguages([...languages, l])
+  const removeSkill = (skill: string) => setSkills(prev => prev.filter(s => s !== skill))
+
+  const handleComplete = async () => {
+    if (skills.length === 0 || !bio.trim()) return
+    setLoading(true)
+    try {
+      const { doc, setDoc } = await import('firebase/firestore')
+      const { db, auth: firebaseAuth } = await import('../firebase/config')
+      if (db && firebaseAuth?.currentUser) {
+        await setDoc(doc(db, 'mentors', firebaseAuth.currentUser.uid), {
+          uid: firebaseAuth.currentUser.uid,
+          name: user?.displayName || firebaseAuth.currentUser.displayName || 'Mentor',
+          email: firebaseAuth.currentUser.email || '',
+          skills,
+          hourlyRate,
+          bio: bio.trim(),
+          verificationStatus: 'pending',
+          sessionsCompleted: 0,
+          rating: 0,
+          createdAt: new Date().toISOString(),
+        })
+        await setDoc(doc(db, 'users', firebaseAuth.currentUser.uid), {
+          displayName: user?.displayName || firebaseAuth.currentUser.displayName || 'Mentor',
+          role: 'pending_mentor',
+          onboardingCompleted: true,
+        }, { merge: true })
+      }
+      if (auth?.refreshUserRole) { await auth.refreshUserRole() }
+    } catch (err) { console.error('Profile setup error:', err) }
+    finally { setLoading(false); navigate('/onboarding/mentor/success') }
   }
-
-  const toggleStyle = (s: string) => {
-    if (teachingStyle.includes(s)) setTeachingStyle(teachingStyle.filter((i) => i !== s))
-    else setTeachingStyle([...teachingStyle, s])
-  }
-
-  const allSubjects = ['BBA', 'Economics', 'English', 'BCom', 'Maths', 'Reasoning', 'GK', 'UP Police', 'SSC', 'Banking']
-  const allLanguages = ['English', 'Hinglish', 'Hindi']
-  const allExperiences = ['College Senior', 'Fresher', '1-2 Years', '3+ Years']
-  const allStyles = ['Conceptual', 'Exam-focused', 'Practical', 'Doubt-solving']
-
-  const completeness = 85
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    navigate('/mentor-success')
-  }
-
-  const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-  const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
   return (
     <div className="senjr-app">
       <header className="senjr-header">
-        <button className="senjr-header-back" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} />
-        </button>
-        <span className="senjr-header-title">Complete Your Profile</span>
-        <div style={{ width: 36 }} />
+        <div />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[0,1,2,3,4].map((i) => <div key={i} style={{ width: 24, height: 4, borderRadius: 2, background: i < 4 ? 'var(--senjr-green)' : 'var(--senjr-border)' }} />)}
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Step 4/5</span>
       </header>
 
-      <div className="senjr-step-indicator">
-        <div className="senjr-step-dot senjr-step-dot-orange" />
-        <div className="senjr-step-dot senjr-step-dot-orange" />
-        <div className="senjr-step-dot senjr-step-dot-orange" />
-        <div className="senjr-step-dot senjr-step-dot-orange" />
-      </div>
-
       <div className="senjr-page">
-        <div className="senjr-content">
-          <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 16 }}>STEP 4 OF 4</p>
+        <div className="senjr-content" style={{ paddingTop: 20 }}>
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--senjr-green), var(--senjr-orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 800, color: 'white', margin: '0 auto 16px' }}>
+            {user?.displayName?.charAt(0) || 'M'}
+          </div>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6, textAlign: 'center' }}>Mentor Profile</h2>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', textAlign: 'center', marginBottom: 32 }}>Set up your mentor profile to start accepting students</p>
 
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              border: '3px solid var(--senjr-orange)',
-              background: 'var(--senjr-orange-bg)',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto', cursor: 'pointer', gap: 2
-            }}>
-              <Camera size={24} style={{ color: 'var(--senjr-orange)' }} />
-              <span style={{ fontSize: 10, color: 'var(--senjr-text-muted)' }}>Upload Photo</span>
-            </div>
-            <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginTop: 4 }}>Professional Photo</p>
+          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Your Expertise</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+            {skills.map((s) => (
+              <span key={s} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 20, background: 'var(--senjr-green-light)', color: 'var(--senjr-green-dark)', fontSize: 12, fontWeight: 600 }}>
+                {s} <button onClick={() => removeSkill(s)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--senjr-green-dark)', display: 'flex' }}><X size={12} /></button>
+              </span>
+            ))}
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>
-              Subjects <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--senjr-orange)' }}>MULTI-SELECT</span>
-            </h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {allSubjects.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`senjr-chip ${subjects.includes(s) ? 'senjr-chip-orange' : ''}`}
-                  onClick={() => toggleSubject(s)}
-                  style={{ fontSize: 13, padding: '6px 14px' }}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            <input className="senjr-input" style={{ flex: 1 }} placeholder="Search or type expertise..." value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addSkill(skillInput)} />
+            <button onClick={() => addSkill(skillInput)} style={{ padding: '10px 14px', borderRadius: 8, background: skillInput ? 'var(--senjr-green)' : 'var(--senjr-border)', color: 'white', border: 'none', cursor: skillInput ? 'pointer' : 'default' }}><Plus size={18} /></button>
+          </div>
 
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>Languages</h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {allLanguages.map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  className={`senjr-chip ${languages.includes(l) ? 'senjr-chip-orange' : ''}`}
-                  onClick={() => toggleLanguage(l)}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>Experience</h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {allExperiences.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  className={`senjr-chip ${experience === e ? 'senjr-chip-orange' : ''}`}
-                  onClick={() => setExperience(e)}
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
-
-            <div className="senjr-card" style={{ marginBottom: 24 }}>
-              <h3 className="senjr-section-title" style={{ fontSize: 16, textAlign: 'center' }}>Hourly Rate</h3>
-              <p style={{ textAlign: 'center', fontSize: 36, fontWeight: 800, color: 'var(--senjr-text)', marginBottom: 12 }}>
-                ₹{hourlyRate}
-              </p>
-              <input
-                type="range"
-                min={50}
-                max={2000}
-                step={50}
-                value={hourlyRate}
-                onChange={(e) => setHourlyRate(Number(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--senjr-orange)' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--senjr-text-muted)', marginTop: 4 }}>
-                <span>₹50</span>
-                <span>₹2000</span>
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginTop: 8, textAlign: 'center' }}>
-                 Suggested: ₹200 based on experience
-              </p>
-            </div>
-
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>Availability</h2>
-            <div className="senjr-card" style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                {days.map((d) => (
-                  <span key={d} style={{ width: 32, textAlign: 'center', fontSize: 12, fontWeight: 600 }}>{d}</span>
-                ))}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontSize: 11, color: 'var(--senjr-text-muted)', width: 32 }}>AM</span>
-                {dayKeys.map((d) => (
-                  <button
-                    key={`am-${d}`}
-                    type="button"
-                    onClick={() => setAvailability({ ...availability, [d]: { ...availability[d], am: !availability[d].am } })}
-                    style={{
-                      width: 32, height: 28, borderRadius: 6,
-                      background: availability[d].am ? 'var(--senjr-orange)' : 'var(--senjr-bg)',
-                      border: '1px solid var(--senjr-border)',
-                      cursor: 'pointer'
-                    }}
-                  />
-                ))}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 11, color: 'var(--senjr-text-muted)', width: 32 }}>PM</span>
-                {dayKeys.map((d) => (
-                  <button
-                    key={`pm-${d}`}
-                    type="button"
-                    onClick={() => setAvailability({ ...availability, [d]: { ...availability[d], pm: !availability[d].pm } })}
-                    style={{
-                      width: 32, height: 28, borderRadius: 6,
-                      background: availability[d].pm ? 'var(--senjr-orange)' : 'var(--senjr-bg)',
-                      border: '1px solid var(--senjr-border)',
-                      cursor: 'pointer'
-                    }}
-                  />
-                ))}
-              </div>
-              <button type="button" className="senjr-btn senjr-btn-outline senjr-btn-sm" style={{ marginTop: 12, fontSize: 12 }}>
-                ⚡ Quick select: Weekdays 6-8 PM
-              </button>
-            </div>
-
-            <div className="senjr-input-group">
-              <label className="senjr-input-label">Bio</label>
-              <textarea
-                className="senjr-input"
-                rows={3}
-                placeholder="Tell students about yourself..."
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                maxLength={300}
-              />
-              <p style={{ textAlign: 'right', fontSize: 12, color: 'var(--senjr-text-muted)' }}>{bio.length}/300</p>
-            </div>
-
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>Teaching Style</h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {allStyles.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`senjr-chip ${teachingStyle.includes(s) ? 'senjr-chip-orange' : ''}`}
-                  onClick={() => toggleStyle(s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Profile Completeness</span>
-                <span style={{ fontSize: 12, fontWeight: 600 }}>{completeness}%</span>
-              </div>
-              <div className="senjr-progress-bar">
-                <div className="senjr-progress-fill senjr-progress-fill-orange" style={{ width: `${completeness}%` }} />
-              </div>
-              <div style={{ textAlign: 'right', marginTop: 4 }}>
-                <span className="senjr-badge senjr-badge-green">+50 XP</span>
-              </div>
-            </div>
-
-            <button type="submit" className="senjr-btn senjr-btn-orange">
-               Go Live as Mentor!
+          {expertiseOptions.filter(e => !skills.includes(e) && e.toLowerCase().includes(skillInput.toLowerCase())).slice(0, 8).map((opt) => (
+            <button key={opt} onClick={() => addSkill(opt)} style={{ padding: '6px 12px', borderRadius: 16, background: 'var(--senjr-bg)', border: '1px solid var(--senjr-border)', cursor: 'pointer', fontSize: 12, margin: '0 4px 6px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <Plus size={10} /> {opt}
             </button>
-            <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--senjr-text-muted)', marginTop: 8 }}>
-              By going live, you agree to our terms
-            </p>
-          </form>
+          ))}
+
+          <div style={{ marginTop: 20, marginBottom: 20 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Hourly Rate (₹)</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <input type="range" min="50" max="2000" step="50" value={hourlyRate} onChange={(e) => setHourlyRate(Number(e.target.value))} style={{ flex: 1 }} />
+              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--senjr-green)' }}>₹{hourlyRate}</span>
+            </div>
+          </div>
+
+          <div className="senjr-input-group" style={{ marginBottom: 32 }}>
+            <label className="senjr-input-label">Bio</label>
+            <textarea className="senjr-input" rows={4} placeholder="Describe your experience, teaching style, and what students can expect..." value={bio} onChange={(e) => setBio(e.target.value)} />
+          </div>
+
+          <button className="senjr-btn" style={{ background: skills.length > 0 && bio.trim() ? 'var(--senjr-green)' : 'var(--senjr-border)', color: skills.length > 0 && bio.trim() ? 'white' : 'var(--senjr-text-muted)' }} disabled={skills.length === 0 || !bio.trim() || loading} onClick={handleComplete}>
+            {loading ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : <>Complete Profile <ArrowRight size={18} /></>}
+          </button>
         </div>
       </div>
     </div>

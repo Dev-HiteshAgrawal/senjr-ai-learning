@@ -62,18 +62,61 @@ function ProtectedRoutes() {
       } />
 
       {/* Student onboarding routes */}
-      <Route path="/student-signup" element={<StudentSignup />} />
-      <Route path="/student-education" element={<StudentEducation />} />
-      <Route path="/student-goals" element={<StudentGoals />} />
-      <Route path="/student-profile" element={<StudentProfile />} />
+      <Route path="/student-signup" element={
+        <ProtectedRoute allowedRoles={['student']}>
+          <StudentSignup />
+        </ProtectedRoute>
+      } />
+      <Route path="/onboarding/student/education" element={
+        <ProtectedRoute allowedRoles={['student']}>
+          <StudentEducation />
+        </ProtectedRoute>
+      } />
+      <Route path="/onboarding/student/goals" element={
+        <ProtectedRoute allowedRoles={['student']}>
+          <StudentGoals />
+        </ProtectedRoute>
+      } />
+      <Route path="/onboarding/student/profile" element={
+        <ProtectedRoute allowedRoles={['student']}>
+          <StudentProfile />
+        </ProtectedRoute>
+      } />
+      <Route path="/student-education" element={<Navigate to="/onboarding/student/education" replace />} />
+      <Route path="/student-goals" element={<Navigate to="/onboarding/student/goals" replace />} />
+      <Route path="/student-profile" element={<Navigate to="/onboarding/student/profile" replace />} />
       <Route path="/dashboard" element={<Navigate to="/dashboard/student" replace />} />
 
       {/* Mentor routes */}
-      <Route path="/mentor-signup" element={<MentorSignup />} />
-      <Route path="/mentor-verify" element={<MentorVerify />} />
-      <Route path="/mentor-video" element={<MentorVideo />} />
-      <Route path="/mentor-profile" element={<MentorProfile />} />
-      <Route path="/mentor-success" element={<MentorSuccess />} />
+      <Route path="/mentor-signup" element={
+        <ProtectedRoute allowedRoles={['pending_mentor']}>
+          <MentorSignup />
+        </ProtectedRoute>
+      } />
+      <Route path="/onboarding/mentor/verify" element={
+        <ProtectedRoute allowedRoles={['pending_mentor']}>
+          <MentorVerify />
+        </ProtectedRoute>
+      } />
+      <Route path="/onboarding/mentor/video" element={
+        <ProtectedRoute allowedRoles={['pending_mentor']}>
+          <MentorVideo />
+        </ProtectedRoute>
+      } />
+      <Route path="/onboarding/mentor/profile" element={
+        <ProtectedRoute allowedRoles={['pending_mentor']}>
+          <MentorProfile />
+        </ProtectedRoute>
+      } />
+      <Route path="/onboarding/mentor/success" element={
+        <ProtectedRoute allowedRoles={['pending_mentor']}>
+          <MentorSuccess />
+        </ProtectedRoute>
+      } />
+      <Route path="/mentor-verify" element={<Navigate to="/onboarding/mentor/verify" replace />} />
+      <Route path="/mentor-video" element={<Navigate to="/onboarding/mentor/video" replace />} />
+      <Route path="/mentor-profile" element={<Navigate to="/onboarding/mentor/profile" replace />} />
+      <Route path="/mentor-success" element={<Navigate to="/onboarding/mentor/success" replace />} />
       <Route path="/mentor-hub" element={
         <ProtectedRoute allowedRoles={['mentor', 'pending_mentor']}>
           <MentorHub />

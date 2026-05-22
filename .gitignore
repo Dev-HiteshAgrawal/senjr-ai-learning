@@ -30,3 +30,9 @@ dist-ssr
 
 .vercel
 .env*.local
+
+# Temp QA/status files
+*_report.txt
+*_note.txt
+issue_status.txt
+final_verification.txt

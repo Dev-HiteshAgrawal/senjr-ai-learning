@@ -1,186 +1,108 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Building2, Briefcase, GraduationCap, Wrench, TrendingDown, TrendingUp } from 'lucide-react'
+import { Target, ArrowRight, Star, Brain, BookOpen, Code, PenTool, BarChart3, Globe, Loader2 } from 'lucide-react'
+import { doc, setDoc } from 'firebase/firestore'
+import { db } from '../firebase/config'
+import { AuthContext } from '../contexts/AuthContext'
+
+const goals = [
+  { id: 'exams', label: 'Exam Preparation', icon: <Target size={20} />, desc: 'JEE, NEET, GATE, UPSC, etc.' },
+  { id: 'skills', label: 'Skill Building', icon: <Brain size={20} />, desc: 'Coding, AI, Data Science, etc.' },
+  { id: 'academic', label: 'Academic Help', icon: <BookOpen size={20} />, desc: 'School / College subjects' },
+  { id: 'coding', label: 'Coding & DSA', icon: <Code size={20} />, desc: 'Interview preparation' },
+  { id: 'creative', label: 'Creative Skills', icon: <PenTool size={20} />, desc: 'Writing, Design, etc.' },
+  { id: 'career', label: 'Career Guidance', icon: <BarChart3 size={20} />, desc: 'Internships, Jobs, Mentorship' },
+  { id: 'language', label: 'Languages', icon: <Globe size={20} />, desc: 'English, Foreign Languages' },
+  { id: 'other', label: 'Other', icon: <Star size={20} />, desc: 'Something else' },
+]
+
+const weaknesses = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Programming', 'English', 'Logical Reasoning', 'Data Interpretation']
 
 export default function StudentGoals() {
   const navigate = useNavigate()
-  const [goal, setGoal] = useState('Govt Job')
-  const [exams, setExams] = useState<string[]>(['UP Police', 'SSC CGL'])
-  const [weakSubjects, setWeakSubjects] = useState<string[]>(['Maths'])
-  const [strongSubjects, setStrongSubjects] = useState<string[]>(['Science'])
-  const [language, setLanguage] = useState('Hinglish')
-  const [studyHours, setStudyHours] = useState('3-4h')
+  const auth = useContext(AuthContext)
+  const user = auth?.user ?? null
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([])
+  const [selectedWeaknesses, setSelectedWeaknesses] = useState<string[]>([])
+  const [targetExam, setTargetExam] = useState('')
+  const [saving, setSaving] = useState(false)
 
-  const toggleItem = (list: string[], setList: (v: string[]) => void, item: string) => {
-    if (list.includes(item)) {
-      setList(list.filter((i) => i !== item))
-    } else {
-      setList([...list, item])
+  const toggleGoal = (id: string) => {
+    setSelectedGoals(prev => prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id])
+  }
+
+  const toggleWeakness = (w: string) => {
+    setSelectedWeaknesses(prev => prev.includes(w) ? prev.filter(x => x !== w) : [...prev, w])
+  }
+
+  const handleContinue = async () => {
+    if (selectedGoals.length === 0 || !user?.uid || !db) return
+    setSaving(true)
+    try {
+      await setDoc(doc(db, 'students', user.uid), {
+        goals: selectedGoals,
+        targetExams: targetExam ? [targetExam] : [],
+        weakSubjects: selectedWeaknesses,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true })
+      navigate('/onboarding/student/profile')
+    } catch {
+      navigate('/onboarding/student/profile')
+    } finally {
+      setSaving(false)
     }
   }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    sessionStorage.setItem('signupGoals', JSON.stringify({
-      goal,
-      exams,
-      weakSubjects,
-      strongSubjects,
-      language,
-      studyHours,
-    }))
-    navigate('/student-profile')
-  }
-
-  const goals = [
-    { id: 'Govt Job', icon: Building2, label: 'Govt Job' },
-    { id: 'Private Job', icon: Briefcase, label: 'Private Job' },
-    { id: 'Higher Studies', icon: GraduationCap, label: 'Higher Studies' },
-    { id: 'Skill Learning', icon: Wrench, label: 'Skill Learning' },
-  ]
-
-  const allExams = ['UP Police', 'SSC CGL', 'Banking', 'CAT', 'MAT', 'CUET']
-  const allWeak = ['Maths', 'English', 'GK']
-  const allStrong = ['Reasoning', 'Science']
 
   return (
     <div className="senjr-app">
       <header className="senjr-header">
-        <button className="senjr-header-back" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} />
-        </button>
-        <span className="senjr-header-title">Your Goals</span>
-        <div style={{ width: 36 }} />
+        <div />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[0, 1, 2].map((i) => <div key={i} style={{ width: 24, height: 4, borderRadius: 2, background: i < 2 ? 'var(--senjr-green)' : 'var(--senjr-border)' }} />)}
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Step 3/4</span>
       </header>
 
-      <div className="senjr-step-indicator">
-        <div className="senjr-step-dot" />
-        <div className="senjr-step-dot" />
-        <div className="senjr-step-dot senjr-step-dot-active" />
-        <div className="senjr-step-dot" />
-      </div>
-
       <div className="senjr-page">
-        <div className="senjr-content">
-          <form onSubmit={handleSubmit}>
-            <h2 className="senjr-section-title" style={{ fontSize: 18 }}>What is your primary goal?</h2>
-            <div className="senjr-grid-2" style={{ marginBottom: 24 }}>
-              {goals.map((g) => {
-                const Icon = g.icon
-                return (
-                  <button
-                    key={g.id}
-                    type="button"
-                    className={`senjr-card-flat ${goal === g.id ? 'senjr-card-green' : ''}`}
-                    style={{
-                      textAlign: 'center',
-                      padding: 16,
-                      cursor: 'pointer',
-                      marginBottom: 0,
-                      border: goal === g.id ? '2px solid var(--senjr-green)' : undefined,
-                    }}
-                    onClick={() => setGoal(g.id)}
-                  >
-                    <Icon size={24} style={{ margin: '0 auto 8px', color: goal === g.id ? 'var(--senjr-green)' : 'var(--senjr-text-muted)' }} />
-                    <span style={{ fontSize: 13, fontWeight: 600 }}>{g.label}</span>
-                  </button>
-                )
-              })}
-            </div>
+        <div className="senjr-content" style={{ paddingTop: 20 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--senjr-orange-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: 'var(--senjr-orange)' }}>
+            <Target size={28} />
+          </div>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>Your Goals</h2>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>What do you want to achieve?</p>
 
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>
-              Target Exams <span style={{ fontWeight: 400, fontSize: 13, color: 'var(--senjr-text-muted)' }}>(Select multiple)</span>
-            </h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {allExams.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  className={`senjr-chip ${exams.includes(e) ? 'senjr-chip-active' : ''}`}
-                  onClick={() => toggleItem(exams, setExams, e)}
-                >
-                  {e}
-                </button>
-                ))}
-            </div>
+          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Select your learning goals</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 24 }}>
+            {goals.map((goal) => (
+              <button key={goal.id} onClick={() => toggleGoal(goal.id)}
+                style={{ padding: 16, borderRadius: 12, textAlign: 'center', background: selectedGoals.includes(goal.id) ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'var(--senjr-bg)', border: selectedGoals.includes(goal.id) ? '1.5px solid var(--senjr-green)' : '1px solid var(--senjr-border)', cursor: 'pointer', transition: 'all 0.15s' }}>
+                <div style={{ color: selectedGoals.includes(goal.id) ? 'var(--senjr-green)' : 'var(--senjr-text-muted)', marginBottom: 6 }}>{goal.icon}</div>
+                <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{goal.label}</p>
+                <p style={{ fontSize: 10, color: 'var(--senjr-text-muted)' }}>{goal.desc}</p>
+              </button>
+            ))}
+          </div>
 
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>
-              <TrendingDown size={16} style={{ display: 'inline', marginRight: 4, color: 'var(--senjr-orange)' }} />
-              Weak Subjects
-            </h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {allWeak.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`senjr-chip ${weakSubjects.includes(s) ? 'senjr-chip-orange' : ''}`}
-                  onClick={() => toggleItem(weakSubjects, setWeakSubjects, s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Topics you find difficult (optional)</p>
+          <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
+            {weaknesses.map((w) => (
+              <button key={w} className={`senjr-chip ${selectedWeaknesses.includes(w) ? 'senjr-chip-active' : ''}`} onClick={() => toggleWeakness(w)}>{w}</button>
+            ))}
+          </div>
 
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>
-              <TrendingUp size={16} style={{ display: 'inline', marginRight: 4, color: 'var(--senjr-green)' }} />
-              Strong Subjects
-            </h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {allStrong.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`senjr-chip ${strongSubjects.includes(s) ? 'senjr-chip-active' : ''}`}
-                  onClick={() => toggleItem(strongSubjects, setStrongSubjects, s)}
-                >
-                  {s}
-                </button>
-              ))}
+          {selectedGoals.includes('exams') && (
+            <div className="senjr-input-group" style={{ marginBottom: 24 }}>
+              <label className="senjr-input-label">Target Exam (optional)</label>
+              <input className="senjr-input" placeholder="E.g. JEE Advanced 2025" value={targetExam} onChange={(e) => setTargetExam(e.target.value)} />
             </div>
+          )}
 
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>Preferred Language</h2>
-            <div style={{ display: 'flex', gap: 0, marginBottom: 24 }}>
-              {['Hindi', 'English', 'Hinglish'].map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  style={{
-                    flex: 1,
-                    padding: '10px 0',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    border: '2px solid var(--senjr-text)',
-                    background: language === l ? 'var(--senjr-green)' : 'var(--senjr-bg-card)',
-                    color: language === l ? 'white' : 'var(--senjr-text)',
-                    cursor: 'pointer',
-                    ...(l === 'Hindi' ? { borderRadius: '8px 0 0 8px' } : {}),
-                    ...(l === 'Hinglish' ? { borderRadius: '0 8px 8px 0' } : {}),
-                  }}
-                  onClick={() => setLanguage(l)}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>Study Hours / Day</h2>
-            <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
-              {['1-2h', '3-4h', '5-6h', '6h+'].map((h) => (
-                <button
-                  key={h}
-                  type="button"
-                  className={`senjr-chip ${studyHours === h ? (h === '3-4h' ? 'senjr-chip-orange' : 'senjr-chip-active') : ''}`}
-                  onClick={() => setStudyHours(h)}
-                >
-                  {h}
-                </button>
-              ))}
-            </div>
-
-            <button type="submit" className="senjr-btn senjr-btn-green">
-              Continue →
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button className="senjr-btn" style={{ background: 'transparent', color: 'var(--senjr-text)', border: '1px solid var(--senjr-border)', width: 'auto' }} onClick={() => navigate('/onboarding/student/education')}>Back</button>
+            <button className="senjr-btn" style={{ background: selectedGoals.length > 0 && !saving ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedGoals.length > 0 && !saving ? 'white' : 'var(--senjr-text-muted)', flex: 1 }} disabled={selectedGoals.length === 0 || saving} onClick={handleContinue}>
+              {saving ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : <>Continue <ArrowRight size={18} /></>}
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </div>

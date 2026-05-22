@@ -11,11 +11,15 @@
 | Component | Status | Action Required |
 |-----------|--------|------------------|
 | Vercel Deployment | ✅ Live | None |
-| Firebase Project | ❌ Not created | BLOCKER - requires human action |
-| Firebase Env Vars | ❌ Not set | BLOCKER - requires human action |
+| Firebase Project | ✅ Created | Account setup complete |
+| Firebase Env Vars | ✅ Configured | Vercel env vars set |
 | Auth (Firebase) | ✅ Implemented | Code complete |
 | Firestore/Storage | ✅ Configured | Code complete |
-| GitHub Remote | ❌ Not connected | Optional |
+| Firestore Schema Types | ✅ Created | src/types/firestore.ts |
+| Role Routing Utility | ✅ Created | src/lib/role-routing.ts |
+| Student Onboarding Persistence | ✅ Fixed | Now saves to Firestore progressively |
+| ProtectedRoute on Onboarding | ✅ Added | All onboarding pages wrapped |
+| GitHub Remote | ✅ Connected | https://github.com/Dev-HiteshAgrawal/senjr-ai-learning |
 | AI Tutor | ✅ Implemented | Code complete (needs GROQ_API_KEY) |
 | Booking/Payment | ✅ Implemented | Code complete |
 | Mentor Verification | ✅ Implemented | Code complete |
@@ -25,24 +29,14 @@
 
 ## Phase 1 Execution (Next 24 Hours)
 
-### BLOCKERS (Require Account Access - NOT IN SCOPE)
+### ✅ Account Blockers Resolved (2026-05-22)
 
-1. **Create Firebase Project** (baatchetindia@gmail.com account)
-   - Create project: senjr-ai-learning
-   - Enable Authentication > Email/Password
-   - Get 6 config values
-
-2. **Add Vercel Environment Variables**
-   - VITE_FIREBASE_API_KEY
-   - VITE_FIREBASE_AUTH_DOMAIN
-   - VITE_FIREBASE_PROJECT_ID
-   - VITE_FIREBASE_STORAGE_BUCKET
-   - VITE_FIREBASE_MESSAGING_SENDER_ID
-   - VITE_FIREBASE_APP_ID
-
-3. **Redeploy Vercel** to pick up env vars
-
-**Unblock owner**: CEO or account holder (ashisbhakta890@gmail.com)
+All prior blockers have been resolved by the board:
+- Firebase Project `senjr-ai-learning` created
+- Auth providers (Email/Password) enabled
+- Vercel env vars configured with real Firebase config values
+- Production deploy clean at https://senjr-ai-learning.vercel.app
+- Firebase Auth signup/login tested end-to-end
 
 ---
 
@@ -93,8 +87,8 @@
 6. **✅ DONE**: Booking/Payment system (src/services/sessions.ts)
 7. **✅ DONE**: Mentor Verification workflow (src/services/verification.ts)
 8. **✅ DONE**: QA/Trust fixes (MentorSuccess, Landing, ProtectedRoute, etc.)
-9. **BLOCKED**: Firebase project creation (requires human action)
-10. **BLOCKED**: Vercel env vars (requires human action)
+9. **✅ DONE**: Firebase project creation and Auth setup
+10. **✅ DONE**: Vercel env vars with real Firebase config
 11. **BLOCKED**: GROQ_API_KEY for AI Tutor (requires human action)
 
 ## Completed This Session
@@ -133,24 +127,12 @@ All code work is done. Build passes. The following was implemented:
 
 ---
 
-## Next Action Required (Human)
+## ✅ Account Setup Complete (2026-05-22)
 
-The code is complete. To make the app fully functional, the human needs to:
+Firebase project, Auth providers, and Vercel env vars are all configured. The app is production-ready at https://senjr-ai-learning.vercel.app.
 
-1. **Create Firebase Project** at firebase.google.com using baatchetindia@gmail.com
-   - Enable Authentication > Email/Password
-   - Get 6 config values
-
-2. **Add Vercel Environment Variables** (for production):
-   - VITE_FIREBASE_API_KEY
-   - VITE_FIREBASE_AUTH_DOMAIN
-   - VITE_FIREBASE_PROJECT_ID
-   - VITE_FIREBASE_STORAGE_BUCKET
-   - VITE_FIREBASE_MESSAGING_SENDER_ID
-   - VITE_FIREBASE_APP_ID
-   - GROQ_API_KEY (free at groq.com)
-
-3. **Redeploy Vercel** to pick up env vars
+One remaining optional task:
+1. **GROQ_API_KEY** (free at groq.com) — needed for AI Tutor chat functionality
 
 ---
 

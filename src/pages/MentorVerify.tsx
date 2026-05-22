@@ -1,276 +1,141 @@
-import { useState, useRef, useCallback, useContext } from 'react'
+import { useState, useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Lock, Camera, FileText, Award, ChevronDown, CheckCircle, XCircle, AlertCircle, Video } from 'lucide-react'
-import {
-  submitMentorDocument,
-  validateFileType,
-  validateFileSize,
-  type DocumentType,
-} from '../services/verification'
+import { ArrowRight, Shield, Upload, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react'
 import { AuthContext } from '../contexts/AuthContext'
+import { submitMentorDocument, validateFileType, validateFileSize } from '../services/verification'
 
-interface UploadedFile {
-  type: DocumentType
-  status: 'pending' | 'approved' | 'rejected' | 'needs_clarification'
-  fileName: string
-  error?: string
-}
+const idOptions = [
+  { id: 'identity_front' as const, label: 'Aadhaar (Front)' },
+  { id: 'identity_back' as const, label: 'Aadhaar (Back)' },
+  { id: 'pan' as const, label: 'PAN Card' },
+  { id: 'college' as const, label: 'College ID' },
+]
+
+type DocType = 'identity_front' | 'identity_back' | 'pan' | 'college'
 
 export default function MentorVerify() {
   const navigate = useNavigate()
-  const { user } = useContext(AuthContext) || { user: null }
-  const [idType, setIdType] = useState('Aadhaar')
-  const [upiId, setUpiId] = useState('')
-  const [confirmUpi, setConfirmUpi] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<Record<DocumentType, UploadedFile | null>>({
-    identity_front: null,
-    identity_back: null,
-    education: null,
-    professional: null,
-    intro_video: null,
-  })
+  const auth = useContext(AuthContext)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [idType, setIdType] = useState<DocType>('identity_front')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
-  const fileInputRefs = useRef<Record<DocumentType, HTMLInputElement | null>>({
-    identity_front: null,
-    identity_back: null,
-    education: null,
-    professional: null,
-    intro_video: null,
-  })
-
-  const handleFileSelect = useCallback(async (documentType: DocumentType, file: File) => {
-    if (!user) return
-
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError('')
+    const file = e.target.files?.[0]
+    if (!file) return
     if (!validateFileType(file)) {
-      setUploadedFiles(prev => ({
-        ...prev,
-        [documentType]: { type: documentType, status: 'pending', fileName: file.name, error: 'Invalid file type' }
-      }))
+      setError('Invalid file type. Allowed: PDF, JPG, PNG, WEBP')
       return
     }
-
     if (!validateFileSize(file)) {
-      setUploadedFiles(prev => ({
-        ...prev,
-        [documentType]: { type: documentType, status: 'pending', fileName: file.name, error: 'File too large (max 5MB)' }
-      }))
+      setError('File too large. Maximum 5MB allowed')
       return
     }
+    setSelectedFile(file)
+  }
 
-    setUploading(true)
-    setUploadedFiles(prev => ({
-      ...prev,
-      [documentType]: { type: documentType, status: 'pending', fileName: file.name }
-    }))
-
-    const filePath = `mentors/${user.uid}/documents/${documentType}_${file.name}`
-
-    const result = await submitMentorDocument(user.uid, documentType, file, filePath)
-
-    setUploadedFiles(prev => ({
-      ...prev,
-      [documentType]: {
-        type: documentType,
-        status: result.success ? 'pending' : 'pending',
-        fileName: file.name,
-        error: result.error,
+  const handleVerify = async () => {
+    if (!selectedFile || !auth?.user) return
+    setError('')
+    setLoading(true)
+    try {
+      const mapType = idType === 'pan' ? 'identity_front' : idType === 'college' ? 'education' : idType
+      const result = await submitMentorDocument(
+        auth.user.uid,
+        mapType,
+        selectedFile,
+        `mentors/${auth.user.uid}/documents/${selectedFile.name}`
+      )
+      if (result.success) {
+        setSuccess(true)
+        setTimeout(() => navigate('/onboarding/mentor/video'), 1500)
+      } else {
+        setError(result.error || 'Verification failed')
       }
-    }))
-    setUploading(false)
-  }, [user])
-
-  const triggerFileInput = (type: DocumentType) => {
-    fileInputRefs.current[type]?.click()
-  }
-
-  const getUploadIcon = (type: DocumentType) => {
-    if (type === 'intro_video') return <Video size={24} style={{ color: 'var(--senjr-orange)', margin: '0 auto 8px' }} />
-    if (type === 'professional') return <Award size={24} style={{ color: 'var(--senjr-orange)', margin: '0 auto 8px' }} />
-    if (type === 'education') return <FileText size={24} style={{ color: 'var(--senjr-orange)', margin: '0 auto 8px' }} />
-    return <Camera size={24} style={{ color: 'var(--senjr-orange)', margin: '0 auto 8px' }} />
-  }
-
-  const renderUploadBox = (type: DocumentType, isRequired: boolean = true) => {
-    const uploaded = uploadedFiles[type]
-    const hasError = uploaded?.error
-
-    return (
-      <div
-        style={{
-          border: `2px dashed ${hasError ? '#EF4444' : uploaded ? '#10B981' : 'var(--senjr-orange)'}`,
-          borderRadius: 12,
-          padding: 20,
-          textAlign: 'center',
-          background: hasError ? '#FEF2F2' : uploaded ? '#F0FDF4' : 'var(--senjr-orange-bg)',
-          cursor: uploaded && !hasError ? 'default' : 'pointer',
-          transition: 'all 0.2s',
-        }}
-        onClick={() => !uploaded && !hasError && triggerFileInput(type)}
-      >
-        <input
-          ref={el => { fileInputRefs.current[type] = el }}
-          type="file"
-          accept={type === 'intro_video' ? 'video/*' : '.pdf,.jpg,.jpeg,.png,.webp'}
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) handleFileSelect(type, file)
-            e.target.value = ''
-          }}
-        />
-        {uploaded ? (
-          hasError ? (
-            <>
-              <XCircle size={24} style={{ color: '#EF4444', margin: '0 auto 8px' }} />
-              <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, color: '#EF4444' }}>{uploaded.fileName}</p>
-              <p style={{ fontSize: 11, color: '#EF4444' }}>{uploaded.error}</p>
-              <p style={{ fontSize: 10, color: '#EF4444', marginTop: 4 }}>Tap to retry</p>
-            </>
-          ) : (
-            <>
-              <CheckCircle size={24} style={{ color: '#10B981', margin: '0 auto 8px' }} />
-              <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, color: '#059669' }}>{uploaded.fileName}</p>
-              <p style={{ fontSize: 11, color: '#059669' }}>Uploaded - {isRequired ? 'Verification Pending' : 'Optional'}</p>
-            </>
-          )
-        ) : (
-          <>
-            {getUploadIcon(type)}
-            <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Tap to upload</p>
-          </>
-        )}
-      </div>
-    )
-  }
-
-  const canContinue = uploadedFiles.identity_front && uploadedFiles.identity_back && uploadedFiles.education && !uploading
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    sessionStorage.setItem('signupVerification', JSON.stringify({
-      idType,
-      upiId,
-      uploadedDocuments: uploadedFiles,
-    }))
-    navigate('/mentor-video')
+    } catch {
+      setError('Failed to submit verification. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="senjr-app">
       <header className="senjr-header">
-        <button className="senjr-header-back" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} />
-        </button>
-        <span className="senjr-header-title" style={{ fontSize: 16 }}>Become a Mentor</span>
-        <div style={{ width: 36 }} />
+        <div />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[0,1,2,3,4].map((i) => <div key={i} style={{ width: 24, height: 4, borderRadius: 2, background: i < 2 ? 'var(--senjr-green)' : 'var(--senjr-border)' }} />)}
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Step 2/5</span>
       </header>
 
-      <div className="senjr-step-indicator">
-        <div className="senjr-step-dot senjr-step-dot-orange" />
-        <div className="senjr-step-dot senjr-step-dot-orange" />
-        <div className="senjr-step-dot" />
-        <div className="senjr-step-dot" />
-      </div>
-
       <div className="senjr-page">
-        <div className="senjr-content">
-          <h2 className="senjr-section-title" style={{ fontSize: 18 }}>Verify Your Identity</h2>
-          <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 16 }}>Step 2 of 4</p>
-
-          <div className="senjr-card-flat" style={{ background: '#EFF6FF', borderColor: '#93C5FD', marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Lock size={16} style={{ color: '#3B82F6' }} />
-              <span style={{ fontSize: 13, color: '#1E40AF' }}>Your documents are secure and only used for verification.</span>
-            </div>
+        <div className="senjr-content" style={{ paddingTop: 20 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: '#D97706' }}>
+            <Shield size={28} />
           </div>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>Identity Verification</h2>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>We verify all mentors to ensure a safe learning environment</p>
 
-          <div className="senjr-card-flat" style={{ background: '#FFFBEB', borderColor: '#FCD34D', marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-              <AlertCircle size={16} style={{ color: '#F59E0B', marginTop: 2, flexShrink: 0 }} />
-              <div>
-                <p style={{ fontSize: 13, color: '#92400E', fontWeight: 600, marginBottom: 4 }}>Pending Manual Review</p>
-                <p style={{ fontSize: 12, color: '#92400E' }}>After submission, our team reviews your documents (usually within 24-48 hours). You'll receive an email notification once approved.</p>
-              </div>
+          {success ? (
+            <div className="senjr-card" style={{ textAlign: 'center', border: '1px solid var(--senjr-green)', background: 'var(--senjr-green-light)', marginBottom: 24, padding: 32 }}>
+              <CheckCircle size={48} style={{ color: 'var(--senjr-green)', marginBottom: 12 }} />
+              <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--senjr-green-dark)' }}>Document Submitted!</p>
+              <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Redirecting to next step...</p>
             </div>
-          </div>
+          ) : (
+            <>
+              <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>ID Type</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 20 }}>
+                {idOptions.map((opt) => (
+                  <button key={opt.id} onClick={() => setIdType(opt.id)}
+                    style={{ padding: 14, borderRadius: 12, background: idType === opt.id ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'var(--senjr-bg)', border: idType === opt.id ? '1.5px solid var(--senjr-green)' : '1px solid var(--senjr-border)', cursor: 'pointer', textAlign: 'center', fontWeight: 600, fontSize: 14, color: idType === opt.id ? 'var(--senjr-green)' : 'var(--senjr-text)' }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="senjr-card" style={{ marginBottom: 20 }}>
-              <h3 className="senjr-section-title" style={{ fontSize: 14, marginBottom: 12 }}>Government ID</h3>
+              <div style={{ border: `2px dashed ${error ? '#EF4444' : selectedFile ? 'var(--senjr-green)' : 'var(--senjr-border)'}`, borderRadius: 12, padding: 24, textAlign: 'center', marginBottom: error ? 8 : 24, cursor: 'pointer', background: selectedFile ? 'var(--senjr-green-light)' : error ? '#FEF2F2' : 'transparent' }}
+                onClick={() => fileInputRef.current?.click()}>
+                {selectedFile ? (
+                  <div>
+                    <CheckCircle size={24} style={{ color: 'var(--senjr-green)', marginBottom: 8 }} />
+                    <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{selectedFile.name}</p>
+                    <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                    <button onClick={(e) => { e.stopPropagation(); setSelectedFile(null) }}
+                      style={{ marginTop: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <X size={14} /> Remove
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload size={24} style={{ color: 'var(--senjr-text-muted)', marginBottom: 8 }} />
+                    <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Upload document photo</p>
+                    <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>JPG, PNG or PDF. Max 5MB</p>
+                  </>
+                )}
+                <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleFileSelect} style={{ display: 'none' }} />
+              </div>
 
-              <div className="senjr-input-group">
-                <label className="senjr-input-label">ID Type</label>
-                <div style={{ position: 'relative' }}>
-                  <select className="senjr-input" value={idType} onChange={(e) => setIdType(e.target.value)}>
-                    <option>Aadhaar</option>
-                    <option>PAN Card</option>
-                    <option>Passport</option>
-                    <option>Driving License</option>
-                  </select>
-                  <ChevronDown size={18} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--senjr-text-muted)', pointerEvents: 'none' }} />
+              {error && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: '#FEF2F2', borderRadius: 8, marginBottom: 20, color: '#EF4444', fontSize: 13 }}>
+                  <AlertCircle size={14} /> {error}
                 </div>
-              </div>
+              )}
 
-              <div className="senjr-grid-2">
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Front Side *</p>
-                  {renderUploadBox('identity_front')}
-                </div>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Back Side *</p>
-                  {renderUploadBox('identity_back')}
-                </div>
-              </div>
-              <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', marginTop: 8 }}>Tips: Good lighting, all corners visible</p>
-            </div>
+              <button className="senjr-btn" style={{ background: selectedFile ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedFile ? 'white' : 'var(--senjr-text-muted)' }} disabled={!selectedFile || loading} onClick={handleVerify}>
+                {loading ? <><Loader2 size={18} className="animate-spin" /> Submitting...</> : <>Submit for Verification <ArrowRight size={18} /></>}
+              </button>
+            </>
+          )}
 
-            <div className="senjr-card" style={{ marginBottom: 20 }}>
-              <h3 className="senjr-section-title" style={{ fontSize: 14, marginBottom: 12 }}>Education Proof *</h3>
-              <label className="senjr-input-label">College Degree or Last Marksheet</label>
-              {renderUploadBox('education')}
-              <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', marginTop: 8 }}>Supported: PDF, JPG, PNG (max 5MB)</p>
-            </div>
-
-            <div className="senjr-card" style={{ marginBottom: 20, position: 'relative' }}>
-              <span className="senjr-badge senjr-badge-green" style={{ position: 'absolute', top: -8, right: 12 }}>+10 XP</span>
-              <h3 className="senjr-section-title" style={{ fontSize: 14, marginBottom: 12 }}>Professional Certificate</h3>
-              <label className="senjr-input-label">Any certification (optional but recommended)</label>
-              {renderUploadBox('professional', false)}
-            </div>
-
-            <div className="senjr-card" style={{ marginBottom: 20, position: 'relative' }}>
-              <span className="senjr-badge senjr-badge-green" style={{ position: 'absolute', top: -8, right: 12 }}>+10 XP</span>
-              <h3 className="senjr-section-title" style={{ fontSize: 14, marginBottom: 12 }}>Intro Video</h3>
-              <label className="senjr-input-label">Optional: Record a short intro video</label>
-              {renderUploadBox('intro_video', false)}
-              <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', marginTop: 8 }}>Max 30 seconds, MP4 format (max 20MB)</p>
-            </div>
-
-            <div className="senjr-card" style={{ marginBottom: 20 }}>
-              <h3 className="senjr-section-title" style={{ fontSize: 14, marginBottom: 12 }}>Payment Details</h3>
-              <div className="senjr-input-group">
-                <label className="senjr-input-label">UPI ID</label>
-                <input className="senjr-input" placeholder="name@upi" value={upiId} onChange={(e) => setUpiId(e.target.value)} />
-              </div>
-              <div className="senjr-input-group">
-                <label className="senjr-input-label">Confirm UPI ID</label>
-                <input className="senjr-input" placeholder="name@upi" value={confirmUpi} onChange={(e) => setConfirmUpi(e.target.value)} />
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>This is where your earnings will be sent</p>
-            </div>
-
-            <button type="submit" className="senjr-btn senjr-btn-orange" disabled={!canContinue} style={{ opacity: canContinue ? 1 : 0.5 }}>
-              Continue
-            </button>
-
-            {!canContinue && (
-              <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--senjr-text-muted)', marginTop: 8 }}>
-                <AlertCircle size={12} style={{ display: 'inline', marginRight: 4 }} />
-                Please upload required documents to continue
-              </p>
-            )}
-          </form>
+          <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', textAlign: 'center', marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+            <AlertCircle size={12} /> Your information is kept secure and never shared
+          </p>
         </div>
       </div>
     </div>

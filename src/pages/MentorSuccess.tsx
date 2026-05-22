@@ -1,157 +1,65 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Share2, Copy, Trophy, AlertCircle, Loader2 } from 'lucide-react'
-import { useAuthActions } from '../hooks/useAuth'
-import { createMentorProfile } from '../services/firestore'
+import { CheckCircle, ArrowRight, Clock, Shield, Users } from 'lucide-react'
 
 export default function MentorSuccess() {
   const navigate = useNavigate()
-  const { signupWithEmail, loading: authLoading } = useAuthActions()
-  const [error, setError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  useEffect(() => {
-    const createAccount = async () => {
-      const email = sessionStorage.getItem('signupEmail')
-      const password = sessionStorage.getItem('signupPassword')
-      const name = sessionStorage.getItem('signupName')
-      const phone = sessionStorage.getItem('signupPhone')
-      const heardAbout = sessionStorage.getItem('signupHeardAbout')
-      const verification = JSON.parse(sessionStorage.getItem('signupVerification') || '{}')
-
-      if (!email || !password || !name) {
-        return
-      }
-
-      setIsSubmitting(true)
-      try {
-        const result = await signupWithEmail(email, password, name, 'mentor')
-        if (result.success) {
-          await createMentorProfile(email, {
-            email,
-            name,
-            phone: phone || undefined,
-            heardAbout: heardAbout || undefined,
-            portfolio: verification.idType ? {
-              education: verification.idType,
-            } : undefined,
-          })
-
-          sessionStorage.removeItem('signupEmail')
-          sessionStorage.removeItem('signupPassword')
-          sessionStorage.removeItem('signupName')
-          sessionStorage.removeItem('signupRole')
-          sessionStorage.removeItem('signupPhone')
-          sessionStorage.removeItem('signupHeardAbout')
-          sessionStorage.removeItem('signupVerification')
-        } else {
-          setError(result.error || 'Failed to create account')
-        }
-      } catch {
-        setError('An unexpected error occurred')
-      } finally {
-        setIsSubmitting(false)
-      }
-    }
-
-    createAccount()
-  }, [signupWithEmail])
-
-  const getErrorMessage = (errorMsg: string) => {
-    if (errorMsg.includes('auth/email-already-in-use')) return 'An account with this email already exists'
-    if (errorMsg.includes('auth/weak-password')) return 'Password should be at least 6 characters'
-    if (errorMsg.includes('Firebase not configured')) return 'Authentication system not configured. Please contact support.'
-    return errorMsg
-  }
 
   return (
-    <div className="senjr-app" style={{
-      background: 'linear-gradient(180deg, #F0FDF4 0%, #FFF7ED 50%, #F0FDF4 100%)',
-      minHeight: '100vh'
-    }}>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px 24px',
-        minHeight: '100vh',
-        textAlign: 'center'
-      }}>
-        {error && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '12px 16px',
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: 8,
-            marginBottom: 16,
-            color: '#ef4444',
-            fontSize: 14,
-            maxWidth: 400
-          }}>
-            <AlertCircle size={18} />
-            <span>{getErrorMessage(error)}</span>
+    <div className="senjr-app">
+      <div className="senjr-page">
+        <div className="senjr-content" style={{ textAlign: 'center', paddingTop: 60 }}>
+          <div className="senjr-pop" style={{ width: 88, height: 88, borderRadius: '50%', background: 'var(--senjr-green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '3px solid var(--senjr-green)' }}>
+            <CheckCircle size={48} style={{ color: 'var(--senjr-green)' }} />
           </div>
-        )}
+          <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>Application Submitted!</h2>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 4, lineHeight: 1.6 }}>
+            Your mentor profile is under review.
+          </p>
+          <p style={{ fontSize: 13, color: 'var(--senjr-orange)', marginBottom: 28, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Clock size={14} /> Verification usually takes 24-48 hours
+          </p>
 
-        {isSubmitting || authLoading ? (
-          <>
-            <Loader2 size={48} style={{ color: 'var(--senjr-orange)', animation: 'spin 1s linear infinite', marginBottom: 24 }} />
-            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>
-              Creating your account...
-            </h2>
-            <p style={{ fontSize: 15, color: 'var(--senjr-text-muted)' }}>
-              Please wait while we set up your mentor profile
-            </p>
-          </>
-        ) : (
-          <>
-            <div style={{
-              width: 100, height: 100, borderRadius: '50%',
-              background: 'var(--senjr-green)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 24,
-              boxShadow: '6px 6px 0 rgba(0,0,0,0.15)'
-            }}>
-              <Trophy size={48} style={{ color: 'white' }} />
-            </div>
-
-            <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>
-              Congratulations!
-            </h1>
-            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>
-              Application submitted - pending review
-            </h2>
-
-            <p style={{ fontSize: 15, color: 'var(--senjr-text-muted)', lineHeight: 1.6, marginBottom: 32 }}>
-              Your application is under review by our team.<br />
-              You'll be notified once approved (usually within 24-48 hours).
-            </p>
-
-            <div className="senjr-card" style={{ width: '100%', marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 4 }}>Your profile link:</p>
-                  <p style={{ fontSize: 14, fontWeight: 600, fontFamily: 'monospace' }}>senjr.com/mentor/@userna...</p>
+          <div className="senjr-card-neo" style={{ textAlign: 'left', marginBottom: 24 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 14 }}>What happens next?</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 13 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--senjr-green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Shield size={14} style={{ color: 'var(--senjr-green)' }} />
                 </div>
-                <button className="senjr-btn-icon" style={{ width: 44, height: 44 }}>
-                  <Copy size={20} />
-                </button>
+                <div>
+                  <p style={{ fontWeight: 600, marginBottom: 2 }}>Document Verification</p>
+                  <p style={{ color: 'var(--senjr-text-muted)', fontSize: 12 }}>We review your submitted documents</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--senjr-orange-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Users size={14} style={{ color: 'var(--senjr-orange)' }} />
+                </div>
+                <div>
+                  <p style={{ fontWeight: 600, marginBottom: 2 }}>Profile Approval</p>
+                  <p style={{ color: 'var(--senjr-text-muted)', fontSize: 12 }}>Once approved, students can book sessions</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--senjr-green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CheckCircle size={14} style={{ color: 'var(--senjr-green)' }} />
+                </div>
+                <div>
+                  <p style={{ fontWeight: 600, marginBottom: 2 }}>Start Mentoring</p>
+                  <p style={{ color: 'var(--senjr-text-muted)', fontSize: 12 }}>Set availability and start earning</p>
+                </div>
               </div>
             </div>
+          </div>
 
-            <button className="senjr-btn senjr-btn-orange" style={{ marginBottom: 12 }}>
-              <Share2 size={18} /> Share
-            </button>
+          <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white', boxShadow: '3px 3px 0 var(--senjr-green-dark)' }} onClick={() => navigate('/mentor/apply')}>
+            Check Application Status <ArrowRight size={18} />
+          </button>
 
-            <button className="senjr-btn senjr-btn-outline" onClick={() => navigate('/mentor-hub')}>
-              Go to Dashboard
-            </button>
-          </>
-        )}
+          <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', marginTop: 16 }}>
+            We'll send you an email once your profile is approved.
+          </p>
+        </div>
       </div>
     </div>
   )

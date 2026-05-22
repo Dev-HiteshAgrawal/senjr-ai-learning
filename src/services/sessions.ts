@@ -213,6 +213,23 @@ export async function updatePaymentStatus(
   })
 }
 
+export function canJoinSession(session: Session): boolean {
+  if (session.status !== 'confirmed') return false
+
+  const [hours, minutes] = session.time.replace(/\s?(AM|PM)/i, '').split(':').map(Number)
+  const isPM = /PM/i.test(session.time)
+  const sessionHour = isPM && hours < 12 ? hours + 12 : !isPM && hours === 12 ? 0 : hours
+
+  const [year, month, day] = session.date.split('-').map(Number)
+  const sessionStart = new Date(year, month - 1, day, sessionHour, minutes)
+  const now = new Date()
+
+  const joinWindowOpen = new Date(sessionStart.getTime() - 15 * 60 * 1000)
+  const sessionEnd = new Date(sessionStart.getTime() + session.duration * 60 * 1000)
+
+  return now >= joinWindowOpen && now <= sessionEnd
+}
+
 export async function getSessionById(sessionId: string): Promise<Session | null> {
   if (!isConfigured || !db) {
     console.warn('Firestore not configured')

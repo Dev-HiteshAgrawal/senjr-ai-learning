@@ -1,138 +1,112 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Video, CameraOff, Upload, FileText, Check } from 'lucide-react'
+import { ArrowRight, Video, Upload, Play, Loader2 } from 'lucide-react'
+import { AuthContext } from '../contexts/AuthContext'
+import { submitMentorDocument } from '../services/verification'
 
 export default function MentorVideo() {
   const navigate = useNavigate()
-  const [, setCameraAccess] = useState(false)
-  const [recording, setRecording] = useState(false)
+  const auth = useContext(AuthContext)
+  const [videoUploaded, setVideoUploaded] = useState(false)
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    navigate('/mentor-profile')
+  const handleContinue = async () => {
+    if (!videoUploaded || !auth?.user) return
+    setLoading(true)
+    try {
+      if (videoFile) {
+        await submitMentorDocument(
+          auth.user.uid,
+          'intro_video',
+          videoFile,
+          `mentors/${auth.user.uid}/documents/${videoFile.name}`
+        )
+      }
+      localStorage.setItem('mentor_video_url', videoUrl || videoFile?.name || 'intro.mp4')
+      navigate('/onboarding/mentor/profile')
+    } catch {
+      navigate('/onboarding/mentor/profile')
+    }
+  }
+
+  const handleVideoSelect = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'video/mp4,video/webm'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        setVideoFile(file)
+        setVideoUploaded(true)
+      }
+    }
+    input.click()
   }
 
   return (
     <div className="senjr-app">
       <header className="senjr-header">
-        <button className="senjr-header-back" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} />
-        </button>
-        <span className="senjr-header-title">Introduce Yourself</span>
-        <div style={{ width: 36 }} />
+        <div />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[0,1,2,3,4].map((i) => <div key={i} style={{ width: 24, height: 4, borderRadius: 2, background: i < 3 ? 'var(--senjr-green)' : 'var(--senjr-border)' }} />)}
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Step 3/5</span>
       </header>
 
-      <div className="senjr-step-indicator">
-        <div className="senjr-step-dot" />
-        <div className="senjr-step-dot" />
-        <div className="senjr-step-dot senjr-step-dot-orange" />
-        <div className="senjr-step-dot" />
-      </div>
-
       <div className="senjr-page">
-        <div className="senjr-content">
-          <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 16 }}>Step 3 of 4</p>
-
-          <div className="senjr-card-orange" style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Video size={20} style={{ color: 'var(--senjr-orange)' }} />
-              <span style={{ fontSize: 14, fontWeight: 600 }}>60-second video = Your first impression</span>
-            </div>
+        <div className="senjr-content" style={{ paddingTop: 20 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: '#3B82F6' }}>
+            <Video size={28} />
           </div>
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>Intro Video</h2>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>Record a short intro video so students can get to know you</p>
 
-          <div style={{ display: 'flex', gap: 0, marginBottom: 16 }}>
-            <button
-              type="button"
-              style={{
-                flex: 1, padding: '10px 0', fontSize: 14, fontWeight: 600,
-                border: '2px solid var(--senjr-orange)',
-                background: !recording ? 'var(--senjr-orange)' : 'var(--senjr-bg-card)',
-                color: !recording ? 'white' : 'var(--senjr-text)',
-                borderRadius: '8px 0 0 8px', cursor: 'pointer'
-              }}
-              onClick={() => setRecording(false)}
-            >
-              📹 Record Live
-            </button>
-            <button
-              type="button"
-              style={{
-                flex: 1, padding: '10px 0', fontSize: 14, fontWeight: 600,
-                border: '2px solid var(--senjr-orange)',
-                background: recording ? 'var(--senjr-orange)' : 'var(--senjr-bg-card)',
-                color: recording ? 'white' : 'var(--senjr-text)',
-                borderRadius: '0 8px 8px 0', cursor: 'pointer'
-              }}
-              onClick={() => setRecording(true)}
-            >
-              <Upload size={16} style={{ display: 'inline', marginRight: 4 }} /> Upload Video
-            </button>
-          </div>
-
-          <div style={{
-            background: '#1A1A2E',
-            borderRadius: 16,
-            padding: 40,
-            textAlign: 'center',
-            marginBottom: 16,
-            minHeight: 200,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12
-          }}>
-            <CameraOff size={48} style={{ color: '#94A3B8' }} />
-            <p style={{ fontSize: 14, color: '#CBD5E1' }}>Camera access is required to record your introduction.</p>
-            <button
-              className="senjr-btn senjr-btn-orange"
-              style={{ width: 'auto', padding: '10px 24px' }}
-              onClick={() => setCameraAccess(true)}
-            >
-              <Video size={16} /> Allow camera access
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <h2 className="senjr-section-title" style={{ fontSize: 16 }}>
-              Topic: Introduce yourself and why you want to mentor
-            </h2>
-
-            <div className="senjr-card-flat" style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FileText size={18} style={{ color: 'var(--senjr-orange)' }} />
-                  <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--senjr-orange)' }}>Sample script</span>
-                </div>
-                <span style={{ fontSize: 18, color: 'var(--senjr-text-muted)' }}>▾</span>
+          <div style={{ aspectRatio: '16/9', borderRadius: 16, background: '#1E293B', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 20, cursor: 'pointer' }}>
+            {videoUploaded ? (
+              <div style={{ textAlign: 'center', color: 'white' }}>
+                <Play size={48} style={{ marginBottom: 8, opacity: 0.8 }} />
+                <p style={{ fontSize: 14 }}>Your intro video</p>
+                <p style={{ fontSize: 12, opacity: 0.5 }}>Intro_Video.mp4</p>
               </div>
-            </div>
+            ) : (
+              <>
+                <Upload size={36} style={{ color: '#64748B', marginBottom: 12 }} />
+                <p style={{ color: '#94A3B8', fontSize: 14, marginBottom: 4 }}>Tap to upload video</p>
+                <p style={{ color: '#64748B', fontSize: 11 }}>MP4, max 2 minutes, 50MB</p>
+              </>
+            )}
+          </div>
 
-            <div className="senjr-card" style={{ marginBottom: 24 }}>
-              <h3 className="senjr-section-title" style={{ fontSize: 14, marginBottom: 12 }}>Guidelines</h3>
-              {[
-                'Face clearly visible',
-                'Speak in Hindi or Hinglish',
-                '60 seconds ideal',
-                'Smile and be yourself!'
-              ].map((g) => (
-                <div key={g} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <div style={{
-                    width: 20, height: 20, borderRadius: '50%',
-                    border: '2px solid var(--senjr-green)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    <Check size={12} style={{ color: 'var(--senjr-green)' }} />
-                  </div>
-                  <span style={{ fontSize: 14 }}>{g}</span>
-                </div>
-              ))}
-            </div>
+          <div style={{ padding: 16, borderRadius: 12, background: '#FEF3C7', marginBottom: 24 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: '#D97706', marginBottom: 4 }}>Tips for a great intro video:</p>
+            <ul style={{ fontSize: 11, color: '#B45309', lineHeight: 1.8, paddingLeft: 16, margin: 0 }}>
+              <li>Introduce yourself and your expertise</li>
+              <li>Share what you love about teaching</li>
+              <li>Keep it under 60 seconds</li>
+              <li>Good lighting and clear audio</li>
+            </ul>
+          </div>
 
-            <button type="submit" className="senjr-btn senjr-btn-orange">
-              Submit Video <Check size={18} />
+          {videoUploaded && (
+            <div className="senjr-input-group" style={{ marginBottom: 24 }}>
+              <label className="senjr-input-label">YouTube link (optional)</label>
+              <input className="senjr-input" placeholder="https://youtube.com/..." value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
+            </div>
+          )}
+
+          {!videoUploaded && (
+            <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white' }} onClick={handleVideoSelect}>
+              <Upload size={16} /> Upload Video
             </button>
-          </form>
+          )}
+
+          {videoUploaded && (
+            <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white' }} onClick={handleContinue} disabled={loading}>
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : <>Continue <ArrowRight size={18} /></>}
+            </button>
+          )}
         </div>
       </div>
     </div>

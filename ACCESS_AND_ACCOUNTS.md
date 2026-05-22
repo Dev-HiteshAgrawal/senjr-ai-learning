@@ -1,6 +1,6 @@
 # Senjr Access and Account Summary
 
-Last checked: 2026-05-20 (verification run)
+Last checked: 2026-05-22 (Auth + Deploy Engineer verification run)
 
 ## Direct Website Link
 

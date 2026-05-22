@@ -9,12 +9,25 @@ export default function LiveSession() {
   const [screenOn, setScreenOn] = useState(false)
   const [transcriptOn, setTranscriptOn] = useState(true)
   const [handRaised, setHandRaised] = useState(false)
-  const [participants] = useState([
+  const [isMentor, setIsMentor] = useState(false)
+  const [participants, setParticipants] = useState([
     { id: 1, name: 'Mentor Riya', role: 'Mentor', mic: true, camera: true, raised: false },
     { id: 2, name: 'Aman', role: 'BBA student', mic: true, camera: false, raised: true },
     { id: 3, name: 'Sana', role: 'UP exam', mic: false, camera: false, raised: false },
     { id: 4, name: 'Vivek', role: 'AI beginner', mic: true, camera: true, raised: false },
   ])
+
+  function muteParticipant(id: number) {
+    setParticipants(prev => prev.map(p =>
+      p.id === id ? { ...p, mic: false } : p
+    ))
+  }
+
+  function disableCameraParticipant(id: number) {
+    setParticipants(prev => prev.map(p =>
+      p.id === id ? { ...p, camera: false } : p
+    ))
+  }
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
 
@@ -219,7 +232,11 @@ export default function LiveSession() {
           <div className="senjr-card-flat" style={{ background: '#1E293B', borderColor: '#334155', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
               <Users size={16} style={{ color: 'var(--senjr-green)' }} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>Participants ({participants.length})</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'white', flex: 1 }}>Participants ({participants.length})</span>
+              <button onClick={() => setIsMentor(!isMentor)}
+                style={{ padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, background: isMentor ? 'var(--senjr-green)' : '#334155', color: isMentor ? 'white' : '#94A3B8', border: 'none', cursor: 'pointer', transition: 'all 0.15s ease' }}>
+                {isMentor ? 'Mentor' : 'Host'}
+              </button>
             </div>
             {participants.map((p) => (
               <div key={p.id} style={{
@@ -239,20 +256,35 @@ export default function LiveSession() {
                   <p style={{ fontSize: 11, color: '#64748B' }}>{p.role}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <span style={{
-                    padding: '2px 8px', borderRadius: 4, fontSize: 10,
-                    background: p.mic ? 'var(--senjr-green-light)' : '#334155',
-                    color: p.mic ? 'var(--senjr-green-dark)' : '#64748B'
-                  }}>
-                    {p.mic ? '🎤' : '🔇'}
-                  </span>
-                  <span style={{
-                    padding: '2px 8px', borderRadius: 4, fontSize: 10,
-                    background: p.camera ? 'var(--senjr-green-light)' : '#334155',
-                    color: p.camera ? 'var(--senjr-green-dark)' : '#64748B'
-                  }}>
-                    {p.camera ? '📹' : '📷'}
-                  </span>
+                  {isMentor && p.role !== 'Mentor' ? (
+                    <>
+                      <button onClick={() => muteParticipant(p.id)} title="Mute participant"
+                        style={{ padding: '2px 6px', borderRadius: 4, fontSize: 10, background: p.mic ? '#334155' : '#7F1D1D', color: p.mic ? '#94A3B8' : '#FCA5A5', border: 'none', cursor: 'pointer' }}>
+                        {p.mic ? <MicOff size={12} /> : <MicOff size={12} />}
+                      </button>
+                      <button onClick={() => disableCameraParticipant(p.id)} title="Disable camera"
+                        style={{ padding: '2px 6px', borderRadius: 4, fontSize: 10, background: p.camera ? '#334155' : '#7F1D1D', color: p.camera ? '#94A3B8' : '#FCA5A5', border: 'none', cursor: 'pointer' }}>
+                        <CameraOff size={12} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 4, fontSize: 10,
+                        background: p.mic ? 'var(--senjr-green-light)' : '#334155',
+                        color: p.mic ? 'var(--senjr-green-dark)' : '#64748B'
+                      }}>
+                        {p.mic ? <Mic size={12} /> : <MicOff size={12} />}
+                      </span>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 4, fontSize: 10,
+                        background: p.camera ? 'var(--senjr-green-light)' : '#334155',
+                        color: p.camera ? 'var(--senjr-green-dark)' : '#64748B'
+                      }}>
+                        {p.camera ? <Camera size={12} /> : <CameraOff size={12} />}
+                      </span>
+                    </>
+                  )}
                   {p.raised && (
                     <span style={{
                       padding: '2px 8px', borderRadius: 4, fontSize: 10,
@@ -260,7 +292,7 @@ export default function LiveSession() {
                       color: 'var(--senjr-orange-dark)',
                       animation: 'pulse 1.5s infinite',
                     }}>
-                      ✋
+                      <Hand size={12} />
                     </span>
                   )}
                 </div>
