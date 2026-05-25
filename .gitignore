@@ -30,6 +30,9 @@ dist-ssr
 
 .vercel
 
+# Agent handoff and status documents
+*_CTO_STATUS.md
+
 # Temp QA/status files
 *_report.txt
 *_note.txt
