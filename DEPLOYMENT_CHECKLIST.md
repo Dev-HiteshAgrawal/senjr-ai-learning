@@ -1,7 +1,7 @@
 # Senjr Deployment Checklist
 
 > **Status**: All account blockers cleared. Build passes. Firebase Auth/Signup tested. Production live.
-> **Last updated**: 2026-05-22
+> **Last updated**: 2026-05-26
 > **Billing**: Zero-budget — Firebase Spark (free) + Vercel Hobby (free) only.
 
 ---

@@ -1,6 +1,6 @@
 # Senjr Access and Account Summary
 
-Last checked: 2026-05-22 (Auth + Deploy Engineer verification run)
+Last checked: 2026-05-26 (Auth + Deploy Engineer heartbeat)
 
 ## Direct Website Link
 
@@ -62,6 +62,16 @@ VITE_FIREBASE_APP_ID=your_app_id
    - Not required for current production deployment
    - Only needed if you want to control Vercel deploys via GitHub Actions instead of Vercel's automatic GitHub integration
    - Can be added later if needed
+
+## Latest Commit
+
+Commit `34827bc` pushed to `origin/main` on 2026-05-:
+- Fixed React 19 lint error (useCallback for media ref handlers in LiveSession)
+- Added `firestore.rules` + `firestore.indexes.json` for Firestore deployment
+- Added `scripts/seed-admin.ts` and `src/services/adminSeed.ts` for admin bootstrapping
+- Cleaned up `.gitignore` (removed duplicate `.env*.local` rule)
+- Various UI/polish updates across all pages
+- Verified: `npm run build` ✅, `npm run lint` ✅
 
 ## Current App State
 
