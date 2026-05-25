@@ -63,37 +63,34 @@ export default function Auth() {
   }
 
   return (
-    <div className="senjr-app" style={{
-      background: 'linear-gradient(180deg, var(--senjr-green-bg) 0%, var(--senjr-orange-bg) 100%)',
-      minHeight: '100vh'
-    }}>
-      <button
-        style={{
-          position: 'absolute', top: 16, left: 16, zIndex: 10,
-          width: 36, height: 36, borderRadius: 10,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'var(--senjr-bg-card)', border: '2px solid var(--senjr-text)',
-          cursor: 'pointer', boxShadow: '2px 2px 0 var(--senjr-text)',
-        }}
-        onClick={() => navigate('/')}
-      >
-        <ArrowLeft size={18} />
-      </button>
-
-      <div className="senjr-fade-in" style={{
+    <div className="senjr-app">
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg, var(--senjr-green-bg) 0%, var(--senjr-orange-bg) 100%)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '24px 16px', minHeight: '100vh', position: 'relative',
+        padding: '24px 16px', position: 'relative',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: 28, position: 'relative', zIndex: 1 }}>
-          <div className="senjr-pop" style={{
-            width: 72, height: 72, borderRadius: 18,
-            background: 'var(--senjr-green)',
+        <button
+          style={{
+            position: 'absolute', top: 16, left: 16,
+            width: 36, height: 36, borderRadius: 10,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px',
-            boxShadow: '4px 4px 0 var(--senjr-text)',
-            border: '2px solid var(--senjr-green-dark)',
+            background: 'var(--senjr-bg-card)', border: '1.5px solid var(--senjr-border)',
+            cursor: 'pointer',
+          }}
+          onClick={() => navigate('/')}
+        >
+          <ArrowLeft size={18} />
+        </button>
+
+        <div className="senjr-fade-in" style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: 16,
+            background: 'linear-gradient(135deg, var(--senjr-green), var(--senjr-green-dark))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 16px', boxShadow: '0 4px 12px rgba(16,185,129,0.3)',
           }}>
-            <span style={{ fontSize: 36, fontWeight: 800, color: 'white' }}>S</span>
+            <span style={{ fontSize: 32, fontWeight: 800, color: 'white' }}>S</span>
           </div>
           <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>
             {mode === 'login' ? 'Welcome back!' : 'Join Senjr'}
@@ -109,8 +106,7 @@ export default function Auth() {
         </div>
 
         <div className="senjr-card" style={{
-          width: '100%', maxWidth: 400, position: 'relative', zIndex: 1,
-          border: '2px solid var(--senjr-text)', boxShadow: '4px 4px 0 var(--senjr-text)',
+          width: '100%', maxWidth: 400,
         }}>
           {mode === 'signup' && (
             <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
@@ -145,7 +141,7 @@ export default function Auth() {
 
           {mode === 'login' && (
             <div style={{ marginBottom: 20, textAlign: 'center' }}>
-              <div style={{ display: 'flex', gap: 0, borderRadius: 10, overflow: 'hidden', border: '2px solid var(--senjr-text)' }}>
+              <div style={{ display: 'flex', gap: 0, borderRadius: 10, overflow: 'hidden', border: '1.5px solid var(--senjr-border)' }}>
                 <button type="button"
                   style={{
                     flex: 1, padding: '10px 0', fontSize: 14, fontWeight: 600,
@@ -170,11 +166,11 @@ export default function Auth() {
           )}
 
           {error && (
-            <div className="senjr-shake" style={{
+            <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 8,
-              marginBottom: 16, color: '#ef4444', fontSize: 13
+              marginBottom: 16, color: '#ef4444', fontSize: 13,
             }}>
               <AlertCircle size={16} /> <span>{error}</span>
             </div>
@@ -207,7 +203,7 @@ export default function Auth() {
               </div>
             </div>
 
-            <button type="submit" className={`senjr-btn ${role === 'mentor' ? 'senjr-btn-orange' : 'senjr-btn-green'} senjr-ripple`}
+            <button type="submit" className={`senjr-btn ${role === 'mentor' ? 'senjr-btn-orange' : 'senjr-btn-green'}`}
               style={{ marginBottom: 12, opacity: isSubmitting ? 0.7 : 1 }} disabled={isSubmitting}>
               {isSubmitting ? (
                 <><Loader2 size={18} className="animate-spin" /> {mode === 'login' ? 'Signing in...' : 'Creating account...'}</>

@@ -123,10 +123,10 @@ export default async function handler(
       return response.status(200).json({ response: 'Chat history cleared.' })
     }
 
-    const systemPrompt = getSystemPrompt(tutorType)
-    const actionPrompt = action ? getActionPrompt(action) : ''
-
-    let conversationHistory = chatHistory[chatId] || []
+     const systemPrompt = getSystemPrompt(tutorType)
+     const actionPrompt = action ? getActionPrompt(action) : ''
+ 
+     const conversationHistory = chatHistory[chatId] || []
     
     const userMessage: Message = { role: 'user', content: message + (actionPrompt ? `\n\n[Action: ${actionPrompt}]` : '') }
     conversationHistory.push(userMessage)

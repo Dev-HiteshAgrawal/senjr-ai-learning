@@ -1,0 +1,133 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper Functions ───────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ─── Users ──────────────────────────────────────────────────────
+    // Stores role mapping: { role: 'student' | 'mentor' | 'pending_mentor' | 'admin' }
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Students ───────────────────────────────────────────────────
+    // Student profiles — keyed by uid
+    match /students/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Mentors ────────────────────────────────────────────────────
+    // Mentor profiles — keyed by uid; visible to all authenticated users
+    match /mentors/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Sessions ───────────────────────────────────────────────────
+    // 1:1 mentoring session bookings
+    match /sessions/{sessionId} {
+      allow read: if isAuthenticated()
+        && (request.auth.uid == resource.data.studentId
+          || request.auth.uid == resource.data.mentorId
+          || isAdmin());
+
+      allow create: if isAuthenticated()
+        && request.resource.data.studentId == request.auth.uid;
+
+      allow update: if isAuthenticated()
+        && (request.auth.uid == resource.data.mentorId
+          || isAdmin());
+
+      allow delete: if isAdmin();
+    }
+
+    // ─── Mentor Documents ───────────────────────────────────────────
+    // Verification / identity documents submitted by mentors
+    match /mentorDocuments/{docId} {
+      allow read: if isAuthenticated()
+        && (request.auth.uid == resource.data.mentorId
+          || isAdmin());
+
+      allow create: if isAuthenticated()
+        && request.resource.data.mentorId == request.auth.uid;
+
+      allow update: if isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // ─── AI Tutor / Chat Sessions ──────────────────────────────────
+    match /chatSessions/{sessionId} {
+      allow read, update, delete: if isAuthenticated()
+        && (request.auth.uid == resource.data.userId
+          || isAdmin());
+
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ─── Reviews ────────────────────────────────────────────────────
+    // Student reviews of mentors
+    match /reviews/{reviewId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.studentId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── Notifications ─────────────────────────────────────────────
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated()
+        && request.auth.uid == resource.data.userId;
+      allow create: if isAdmin();
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.userId;
+      allow delete: if isAdmin();
+    }
+
+    // ─── Resources ─────────────────────────────────────────────────
+    // Learning materials shared by mentors
+    match /resources/{resourceId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Availability Slots ────────────────────────────────────────
+    // Mentor availability calendar
+    match /availabilitySlots/{slotId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.mentorId == request.auth.uid;
+      allow update: if isAuthenticated()
+        && (request.auth.uid == resource.data.mentorId
+          || isAdmin());
+      allow delete: if isAuthenticated()
+        && (request.auth.uid == resource.data.mentorId
+          || isAdmin());
+    }
+  }
+}

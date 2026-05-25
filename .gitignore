@@ -29,10 +29,18 @@ dist-ssr
 *.sw?
 
 .vercel
-.env*.local
 
 # Temp QA/status files
 *_report.txt
 *_note.txt
 issue_status.txt
 final_verification.txt
+
+# Pipeline / CI artifact files
+build_*.txt
+*completion*.txt
+final_*.txt
+status*.txt
+task_*.txt
+verification_*.txt
+qa_*.txt

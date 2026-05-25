@@ -100,10 +100,15 @@ export default function AITutorChat() {
 
   return (
     <div className="senjr-app">
-      <header className="senjr-header" style={{ background: 'white', borderBottom: '1px solid var(--senjr-border)' }}>
+      <header className="senjr-header">
         <button className="senjr-header-back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setShowTutorSelector(true)}>
-          <div className="senjr-avatar" style={{ width: 36, height: 36, fontSize: 14, background: `${currentTutor.color}20`, color: currentTutor.color }}>{currentTutor.name[0]}</div>
+          <div style={{
+            width: 36, height: 36, borderRadius: '50%',
+            background: `${currentTutor.color}20`, color: currentTutor.color,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 700, fontSize: 16,
+          }}>{currentTutor.name[0]}</div>
           <div style={{ textAlign: 'left' }}>
             <span style={{ fontSize: 15, fontWeight: 700 }}>{currentTutor.name}</span>
             <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>{currentTutor.role}</p>
@@ -133,7 +138,10 @@ export default function AITutorChat() {
       <div className="senjr-page" style={{ display: 'flex', flexDirection: 'column', background: '#F8FAFC' }}>
         <div style={{ flex: 1, padding: 16, overflowY: 'auto' }}>
           {messages.length === 0 && (
-            <div className="senjr-fade-in" style={{ background: `${currentTutor.color}10`, borderRadius: 16, padding: 20, marginBottom: 16, border: `1px solid ${currentTutor.color}30`, textAlign: 'center' }}>
+            <div style={{
+              background: `${currentTutor.color}10`, borderRadius: 16, padding: 20, marginBottom: 16,
+              border: `1px solid ${currentTutor.color}30`, textAlign: 'center',
+            }}>
               <MessageSquare size={36} style={{ marginBottom: 12, color: currentTutor.color, opacity: 0.6 }} />
               <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Chat with {currentTutor.name}</p>
               <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 12 }}>
@@ -161,13 +169,12 @@ export default function AITutorChat() {
                     borderRadius: '16px 16px 16px 4px',
                     padding: '12px 16px',
                     marginBottom: 4,
-                    border: '2px solid var(--senjr-border)',
-                    boxShadow: '2px 2px 0 var(--senjr-border)',
-                    position: 'relative',
+                    border: '1px solid var(--senjr-border)',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                   }}>
                     {m.name && (
                       <p style={{ fontSize: 11, fontWeight: 700, color: currentTutor.color, marginBottom: 4 }}>
-                        {m.name} <span style={{ color: 'var(--senjr-text-muted)', fontWeight: 400 }}>· {m.role}</span>
+                        {m.name} <span style={{ color: 'var(--senjr-text-muted)', fontWeight: 400 }}>&middot; {m.role}</span>
                       </p>
                     )}
                     <p style={{ fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{m.text}</p>
@@ -183,8 +190,7 @@ export default function AITutorChat() {
                     borderRadius: '16px 16px 4px 16px',
                     padding: '12px 16px',
                     marginBottom: 4,
-                    border: '2px solid var(--senjr-green-darker)',
-                    boxShadow: '2px 2px 0 var(--senjr-green-darker)',
+                    boxShadow: '0 2px 8px rgba(16,185,129,0.2)',
                   }}>
                     <p style={{ fontSize: 14, lineHeight: 1.6 }}>{m.text}</p>
                   </div>
@@ -198,7 +204,7 @@ export default function AITutorChat() {
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-start' }}>
               <div style={{ background: 'white', borderRadius: '16px 16px 16px 4px', padding: '12px 16px', border: '1px solid var(--senjr-border)' }}>
                 <div style={{ display: 'flex', gap: 4 }}>
-                  {[0, 1, 2].map((i) => (<div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--senjr-text-light)', animation: `bounce 1s infinite ${i * 0.2}s` }} />))}
+                  {[0, 1, 2].map((i) => (<div key={i} className="senjr-typing-dot" />))}
                 </div>
               </div>
             </div>
@@ -237,7 +243,6 @@ export default function AITutorChat() {
           </div>
         </div>
       </div>
-      <style>{`@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }`}</style>
     </div>
   )
 }

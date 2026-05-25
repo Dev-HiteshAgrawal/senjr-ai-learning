@@ -103,12 +103,12 @@ export async function submitMentorDocument(
     submittedAt: now,
   }
 
-  try {
-    await setDoc(doc(db, 'mentorDocuments', docId), docData)
-    return { success: true, docId }
-  } catch (err) {
-    return { success: false, error: 'Failed to save document' }
-  }
+    try {
+      await setDoc(doc(db, 'mentorDocuments', docId), docData)
+      return { success: true, docId }
+    } catch {
+      return { success: false, error: 'Failed to save document' }
+    }
 }
 
 export async function getMentorDocuments(mentorId: string): Promise<MentorDocument[]> {
@@ -153,18 +153,18 @@ export async function reviewDocument(
     return { success: false, error: 'Database not configured' }
   }
 
-  try {
-    await updateDoc(doc(db, 'mentorDocuments', docId), {
-      status,
-      reviewerNotes,
-      reviewedBy: reviewerId,
-      reviewedAt: new Date().toISOString(),
-      flaggedReasons: flaggedReasons || [],
-    })
-    return { success: true }
-  } catch (err) {
-    return { success: false, error: 'Failed to update document' }
-  }
+   try {
+     await updateDoc(doc(db, 'mentorDocuments', docId), {
+       status,
+       reviewerNotes,
+       reviewedBy: reviewerId,
+       reviewedAt: new Date().toISOString(),
+       flaggedReasons: flaggedReasons || [],
+     })
+     return { success: true }
+    } catch {
+      return { success: false, error: 'Failed to update document' }
+    }
 }
 
 export async function updateMentorVerificationStatus(
@@ -186,9 +186,8 @@ export async function checkMentorVerificationComplete(mentorId: string): Promise
 }
 
 export function getVerificationFlags(
-  doc: MentorDocument,
-  allDocs: MentorDocument[],
-  _mentorName?: string
+   doc: MentorDocument,
+   allDocs: MentorDocument[]
 ): VerificationFlags {
   const flags: VerificationFlags = {
     duplicateHash: false,

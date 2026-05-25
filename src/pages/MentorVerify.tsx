@@ -75,37 +75,41 @@ export default function MentorVerify() {
 
       <div className="senjr-page">
         <div className="senjr-content" style={{ paddingTop: 20 }}>
-          <div style={{ width: 56, height: 56, borderRadius: 16, background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: '#D97706' }}>
+          <div className="senjr-pop" style={{ width: 60, height: 60, borderRadius: 16, background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: '#D97706', border: '2px solid #D97706' }}>
             <Shield size={28} />
           </div>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>Identity Verification</h2>
+          <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4, letterSpacing: '-0.3px' }}>Identity Verification</h2>
           <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>We verify all mentors to ensure a safe learning environment</p>
 
           {success ? (
-            <div className="senjr-card" style={{ textAlign: 'center', border: '1px solid var(--senjr-green)', background: 'var(--senjr-green-light)', marginBottom: 24, padding: 32 }}>
-              <CheckCircle size={48} style={{ color: 'var(--senjr-green)', marginBottom: 12 }} />
-              <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--senjr-green-dark)' }}>Document Submitted!</p>
+            <div className="senjr-card-neo-green" style={{ textAlign: 'center', padding: 32 }}>
+              <CheckCircle size={52} style={{ color: 'var(--senjr-green)', marginBottom: 12 }} />
+              <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--senjr-green-dark)' }}>Document Submitted!</p>
               <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Redirecting to next step...</p>
             </div>
           ) : (
             <>
-              <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>ID Type</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 20 }}>
+              <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 4, height: 16, borderRadius: 2, background: 'var(--senjr-orange)' }} />ID Type
+              </p>
+              <div className="senjr-grid-2" style={{ marginBottom: 20 }}>
                 {idOptions.map((opt) => (
                   <button key={opt.id} onClick={() => setIdType(opt.id)}
-                    style={{ padding: 14, borderRadius: 12, background: idType === opt.id ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'var(--senjr-bg)', border: idType === opt.id ? '1.5px solid var(--senjr-green)' : '1px solid var(--senjr-border)', cursor: 'pointer', textAlign: 'center', fontWeight: 600, fontSize: 14, color: idType === opt.id ? 'var(--senjr-green)' : 'var(--senjr-text)' }}>
+                    style={{ padding: 14, borderRadius: 12, background: idType === opt.id ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'white', border: idType === opt.id ? '2px solid var(--senjr-green)' : '2px solid var(--senjr-border)', cursor: 'pointer', textAlign: 'center', fontWeight: 700, fontSize: 14, color: idType === opt.id ? 'var(--senjr-green)' : 'var(--senjr-text)', boxShadow: idType === opt.id ? '2px 2px 0 var(--senjr-green-dark)' : 'none' }}>
                     {opt.label}
                   </button>
                 ))}
               </div>
 
-              <div style={{ border: `2px dashed ${error ? '#EF4444' : selectedFile ? 'var(--senjr-green)' : 'var(--senjr-border)'}`, borderRadius: 12, padding: 24, textAlign: 'center', marginBottom: error ? 8 : 24, cursor: 'pointer', background: selectedFile ? 'var(--senjr-green-light)' : error ? '#FEF2F2' : 'transparent' }}
+              <div style={{ border: `2px dashed ${error ? '#EF4444' : selectedFile ? 'var(--senjr-green)' : 'var(--senjr-border)'}`, borderRadius: 12, padding: 24, textAlign: 'center', marginBottom: error ? 8 : 24, cursor: 'pointer', background: selectedFile ? 'var(--senjr-green-light)' : error ? '#FEF2F2' : 'var(--senjr-bg)' }}
                 onClick={() => fileInputRef.current?.click()}>
                 {selectedFile ? (
                   <div>
-                    <CheckCircle size={24} style={{ color: 'var(--senjr-green)', marginBottom: 8 }} />
-                    <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{selectedFile.name}</p>
-                    <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--senjr-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                      <CheckCircle size={24} style={{ color: 'white' }} />
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{selectedFile.name}</p>
+                    <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>{(selectedFile.size / 1024).toFixed(1)} KB</p>
                     <button onClick={(e) => { e.stopPropagation(); setSelectedFile(null) }}
                       style={{ marginTop: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                       <X size={14} /> Remove
@@ -113,27 +117,27 @@ export default function MentorVerify() {
                   </div>
                 ) : (
                   <>
-                    <Upload size={24} style={{ color: 'var(--senjr-text-muted)', marginBottom: 8 }} />
-                    <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Upload document photo</p>
-                    <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>JPG, PNG or PDF. Max 5MB</p>
+                    <Upload size={32} style={{ color: 'var(--senjr-text-muted)', marginBottom: 12 }} />
+                    <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Upload document photo</p>
+                    <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>JPG, PNG or PDF &middot; Max 5MB</p>
                   </>
                 )}
                 <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleFileSelect} style={{ display: 'none' }} />
               </div>
 
               {error && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: '#FEF2F2', borderRadius: 8, marginBottom: 20, color: '#EF4444', fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 14px', background: '#FEF2F2', borderRadius: 8, marginBottom: 20, color: '#EF4444', fontSize: 13, border: '1px solid #FCA5A5' }}>
                   <AlertCircle size={14} /> {error}
                 </div>
               )}
 
-              <button className="senjr-btn" style={{ background: selectedFile ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedFile ? 'white' : 'var(--senjr-text-muted)' }} disabled={!selectedFile || loading} onClick={handleVerify}>
+              <button className="senjr-btn" style={{ background: selectedFile ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedFile ? 'white' : 'var(--senjr-text-muted)', boxShadow: selectedFile ? '3px 3px 0 var(--senjr-green-dark)' : 'none' }} disabled={!selectedFile || loading} onClick={handleVerify}>
                 {loading ? <><Loader2 size={18} className="animate-spin" /> Submitting...</> : <>Submit for Verification <ArrowRight size={18} /></>}
               </button>
             </>
           )}
 
-          <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', textAlign: 'center', marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+          <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', textAlign: 'center', marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'var(--senjr-bg)', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--senjr-border)' }}>
             <AlertCircle size={12} /> Your information is kept secure and never shared
           </p>
         </div>

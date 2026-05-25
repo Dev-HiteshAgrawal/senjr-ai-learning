@@ -43,8 +43,15 @@ export default function MentorPortfolio() {
 
       <div className="senjr-page">
         <div className="senjr-content">
-          <div className="senjr-card" style={{ textAlign: 'center', border: 'none', background: 'linear-gradient(135deg, #ECFDF5 0%, #FFF7ED 100%)', marginBottom: 16 }}>
-            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--senjr-green), var(--senjr-orange))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 800, color: 'white', margin: '0 auto 12px' }}>
+          <div className="senjr-card" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #ECFDF5 0%, #FFF7ED 100%)', marginBottom: 16 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--senjr-green), var(--senjr-orange))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 32, fontWeight: 800, color: 'white',
+              margin: '0 auto 12px', border: '3px solid white',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            }}>
               {mentor.name.charAt(0)}
             </div>
             <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 2 }}>{mentor.name}</h2>
@@ -63,25 +70,25 @@ export default function MentorPortfolio() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-              <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white', width: 'auto', padding: '10px 20px', fontSize: 14 }} onClick={() => navigate('/book?mentorId=1')}>Book Session</button>
-              <button className="senjr-btn" style={{ background: 'white', color: 'var(--senjr-text)', width: 'auto', padding: '10px', fontSize: 14, border: '1px solid var(--senjr-border)' }}><MessageSquare size={16} /></button>
+              <button className="senjr-btn senjr-btn-green senjr-btn-sm" style={{ padding: '10px 20px', fontSize: 14 }} onClick={() => navigate('/book?mentorId=1')}>Book Session</button>
+              <button className="senjr-btn-icon"><MessageSquare size={16} /></button>
             </div>
           </div>
 
           <div className="senjr-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 20 }}>
-            <div className="senjr-stat-card" style={{ textAlign: 'center', padding: 12 }}>
+            <div className="senjr-card" style={{ textAlign: 'center', padding: 12, marginBottom: 0, border: '1px solid var(--senjr-green)' }}>
               <Users size={18} style={{ margin: '0 auto 4px', color: 'var(--senjr-green)' }} />
               <p className="senjr-stat-value" style={{ fontSize: 18 }}>{mentor.students}</p>
               <p className="senjr-stat-label">Students</p>
             </div>
-            <div className="senjr-stat-card" style={{ textAlign: 'center', padding: 12 }}>
+            <div className="senjr-card" style={{ textAlign: 'center', padding: 12, marginBottom: 0, border: '1px solid var(--senjr-orange)' }}>
               <BookOpen size={18} style={{ margin: '0 auto 4px', color: 'var(--senjr-orange)' }} />
               <p className="senjr-stat-value" style={{ fontSize: 18 }}>{mentor.sessions}</p>
               <p className="senjr-stat-label">Sessions</p>
             </div>
-            <div className="senjr-stat-card" style={{ textAlign: 'center', padding: 12 }}>
+            <div className="senjr-card" style={{ textAlign: 'center', padding: 12, marginBottom: 0, border: '1px solid #3B82F6' }}>
               <Clock size={18} style={{ margin: '0 auto 4px', color: '#3B82F6' }} />
-              <p className="senjr-stat-value" style={{ fontSize: 18 }}>₹{mentor.hourlyRate}</p>
+              <p className="senjr-stat-value" style={{ fontSize: 18 }}>&#8377;{mentor.hourlyRate}</p>
               <p className="senjr-stat-label">Per Hour</p>
             </div>
           </div>
@@ -126,7 +133,7 @@ export default function MentorPortfolio() {
                 <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Achievements</p>
                 <div style={{ display: 'flex', gap: 8 }}>
                   {mentor.achievements.map((ach, i) => (
-                    <div key={i} style={{ flex: 1, padding: 12, background: 'var(--senjr-bg)', borderRadius: 8, textAlign: 'center' }}>
+                    <div key={i} style={{ flex: 1, padding: 12, background: 'var(--senjr-green-bg)', borderRadius: 8, textAlign: 'center', border: '1.5px solid var(--senjr-green-dark)' }}>
                       <div style={{ color: 'var(--senjr-green)', marginBottom: 4 }}>{ach.icon}</div>
                       <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>{ach.label}</p>
                     </div>
@@ -148,7 +155,7 @@ export default function MentorPortfolio() {
           {activeTab === 'reviews' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {mentor.reviews_data.map((review, i) => (
-                <div key={i} className="senjr-card" style={{ border: '1px solid var(--senjr-border)' }}>
+                <div key={i} className="senjr-card" style={{ marginBottom: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                     <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--senjr-green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 16, color: 'var(--senjr-green)' }}>{review.name.charAt(0)}</div>
                     <div style={{ flex: 1 }}>
@@ -166,18 +173,18 @@ export default function MentorPortfolio() {
           )}
 
           {activeTab === 'sessions' && (
-            <div className="senjr-card" style={{ border: '1px solid var(--senjr-border)' }}>
+            <div className="senjr-card" style={{ marginBottom: 16 }}>
               <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Session Topics</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {['ML Fundamentals Crash Course', 'Python for Data Science', 'Deep Learning with TensorFlow', 'System Design for AI Interviews', 'NLP from Scratch'].map((topic, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < 4 ? '1px solid var(--senjr-border)' : 'none' }}>
                     <CheckCircle size={16} style={{ color: 'var(--senjr-green)', flexShrink: 0 }} />
                     <span style={{ fontSize: 13 }}>{topic}</span>
-                    <span className="senjr-badge" style={{ marginLeft: 'auto', background: 'var(--senjr-green-light)', color: 'var(--senjr-green-dark)' }}>Popular</span>
+                    <span className="senjr-tag senjr-tag-green" style={{ marginLeft: 'auto' }}>Popular</span>
                   </div>
                 ))}
               </div>
-              <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white', marginTop: 12 }} onClick={() => navigate('/book?mentorId=1')}>Book a Session</button>
+              <button className="senjr-btn senjr-btn-green" style={{ marginTop: 12 }} onClick={() => navigate('/book?mentorId=1')}>Book a Session</button>
             </div>
           )}
         </div>

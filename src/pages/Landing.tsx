@@ -31,12 +31,12 @@ export default function Landing() {
     { step: '3', title: 'Learn & grow', desc: '1:1 sessions, AI help, mock tests', icon: TrendingUp },
   ]
 
-   const stats = [
-     { value: '500+', label: 'Students', color: 'var(--senjr-green)' },
-     { value: '50+', label: 'Mentors', color: 'var(--senjr-orange)' },
-     { value: '4.8', label: 'Avg Rating', color: '#3B82F6' },
-     { value: 'High', label: 'Satisfaction', color: '#8B5CF6' },
-   ]
+  const stats = [
+    { value: '500+', label: 'Students', color: 'var(--senjr-green)' },
+    { value: '50+', label: 'Mentors', color: 'var(--senjr-orange)' },
+    { value: '4.8', label: 'Avg Rating', color: '#3B82F6' },
+    { value: 'High', label: 'Satisfaction', color: '#8B5CF6' },
+  ]
 
   const popularLessons = [
     {
@@ -76,27 +76,29 @@ export default function Landing() {
 
   return (
     <div className="senjr-app">
-      <header className="senjr-header" style={{ background: 'var(--senjr-black)', color: 'white', border: 'none' }}>
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '14px 16px', background: 'var(--senjr-bg-card)',
+        borderBottom: '1px solid var(--senjr-border)',
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: 'var(--senjr-green)',
+            width: 32, height: 32, borderRadius: 8,
+            background: 'linear-gradient(135deg, var(--senjr-green), var(--senjr-green-dark))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '2px solid var(--senjr-green-dark)',
           }}>
-            <span style={{ fontSize: 18, fontWeight: 800, color: 'white' }}>S</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: 'white' }}>S</span>
           </div>
-          <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px' }}>SENJR</span>
+          <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.5px' }}>SENJR</span>
         </div>
         <button
-          className="senjr-btn senjr-btn-sm"
-          style={{
-            width: 'auto', padding: '8px 20px',
-            background: 'var(--senjr-green)', color: 'white',
-            border: '2px solid var(--senjr-green-dark)',
-            boxShadow: '2px 2px 0 rgba(0,0,0,0.3)',
-          }}
           onClick={() => navigate('/auth')}
+          style={{
+            padding: '8px 20px', borderRadius: 'var(--senjr-radius-full)',
+            background: 'var(--senjr-green)', color: 'white',
+            fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
         >
           Login
         </button>
@@ -107,7 +109,12 @@ export default function Landing() {
 
           <div className="senjr-fade-in" style={{ marginBottom: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-              <span className="senjr-tag senjr-tag-green">
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 12px', borderRadius: 'var(--senjr-radius-full)',
+                background: 'var(--senjr-green-light)', color: 'var(--senjr-green-dark)',
+                fontSize: 12, fontWeight: 600,
+              }}>
                 <Sparkles size={12} /> India's #1 Peer Learning Platform
               </span>
             </div>
@@ -120,37 +127,33 @@ export default function Landing() {
               Not Teachers.
             </h1>
             <p style={{ fontSize: 15, color: 'var(--senjr-text-muted)', lineHeight: 1.5, marginBottom: 20 }}>
-              Real guidance from seniors who've actually cleared the exams<br />and landed the jobs you're aiming for.
+              Real guidance from seniors who've actually cleared the exams and landed the jobs you're aiming for.
             </p>
 
-            <div className="senjr-card" style={{
-              overflow: 'hidden', padding: 0, marginBottom: 20, position: 'relative',
-              boxShadow: '3px 3px 0 var(--senjr-text)',
+            <div style={{
+              background: 'linear-gradient(135deg, var(--senjr-green-lighter) 0%, var(--senjr-orange-lighter) 100%)',
+              borderRadius: 'var(--senjr-radius-lg)', padding: 24, marginBottom: 20,
+              border: '1px solid var(--senjr-border)',
             }}>
               <div style={{
-                background: 'linear-gradient(135deg, #F0FDF4 0%, #FFF7ED 100%)',
-                padding: 24, textAlign: 'center', position: 'relative', zIndex: 1,
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'var(--senjr-black)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 12px',
               }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: '50%',
-                  background: 'var(--senjr-black)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 12px',
-                }}>
-                  <MessageSquare size={22} style={{ color: 'var(--senjr-green)' }} />
-                </div>
-                <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, fontStyle: 'italic' }}>
-                  "Maine khud yeh exams clear kiye hain - ab main aapki madad kar sakta hoon. Real guidance, real results."
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>
-                  - Rahul, IIT Delhi '24
-                </p>
+                <MessageSquare size={20} style={{ color: 'var(--senjr-green)' }} />
               </div>
+              <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, fontStyle: 'italic', textAlign: 'center' }}>
+                "Maine khud yeh exams clear kiye hain - ab main aapki madad kar sakta hoon. Real guidance, real results."
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)', textAlign: 'center' }}>
+                - Rahul, IIT Delhi '24
+              </p>
             </div>
 
             <button
-              className="senjr-btn senjr-btn-green senjr-ripple"
-              style={{ marginBottom: 10, boxShadow: '3px 3px 0 var(--senjr-green-dark)' }}
+              className="senjr-btn senjr-btn-green"
+              style={{ marginBottom: 10, boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}
               onClick={() => navigate('/student-signup')}
             >
               Start Learning Free <ArrowRight size={18} />
@@ -158,15 +161,15 @@ export default function Landing() {
 
             <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
               <button
-                className="senjr-btn senjr-btn-outline senjr-btn-sm"
-                style={{ flex: 1, fontSize: 13 }}
+                className="senjr-btn senjr-btn-sm"
+                style={{ flex: 1, fontSize: 13, border: '1.5px solid var(--senjr-border)', background: 'var(--senjr-bg-card)', borderRadius: 'var(--senjr-radius)' }}
                 onClick={() => navigate('/mentor-signup')}
               >
                 Become a Mentor
               </button>
               <button
-                className="senjr-btn senjr-btn-outline senjr-btn-sm"
-                style={{ flex: 1, fontSize: 13 }}
+                className="senjr-btn senjr-btn-sm"
+                style={{ flex: 1, fontSize: 13, border: '1.5px solid var(--senjr-border)', background: 'var(--senjr-bg-card)', borderRadius: 'var(--senjr-radius)' }}
                 onClick={() => navigate('/auth')}
               >
                 Sign In
@@ -194,40 +197,38 @@ export default function Landing() {
           <div id="how-it-works" data-observe className="senjr-card" style={{
             overflow: 'hidden', padding: 20, marginBottom: 28,
             background: 'var(--senjr-black)', color: 'white', border: 'none',
-            boxShadow: '4px 4px 0 var(--senjr-text)',
           }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 20, textAlign: 'center' }}>
               How It <span style={{ color: 'var(--senjr-green)' }}>Works</span>
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-               {howItWorks.map((item, i) => {
-                 const Icon = item.icon
-                 return (
-                   <div key={item.step} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                     <div style={{
-                       width: 40, height: 40, borderRadius: '50%',
-                       background: i === 1 ? 'var(--senjr-orange)' : 'var(--senjr-green)',
-                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       fontSize: 16, fontWeight: 800, flexShrink: 0,
-                     }}>
-                       <Icon size={20} />
-                     </div>
-                     <div style={{ flex: 1 }}>
-                       <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 2 }}>{item.title}</p>
-                       <p style={{ fontSize: 13, color: '#94A3B8' }}>{item.desc}</p>
-                     </div>
-                      {i < howItWorks.length - 1 && (
-                        <ArrowRight size={18} style={{ color: '#334155' }} />
-                      )}
-                   </div>
-                 )
-               })}
+              {howItWorks.map((item, i) => {
+                const Icon = item.icon
+                return (
+                  <div key={item.step} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: '50%',
+                      background: i === 1 ? 'var(--senjr-orange)' : 'var(--senjr-green)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 16, fontWeight: 800, flexShrink: 0,
+                    }}>
+                      <Icon size={20} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 2 }}>{item.title}</p>
+                      <p style={{ fontSize: 13, color: '#94A3B8' }}>{item.desc}</p>
+                    </div>
+                    {i < howItWorks.length - 1 && (
+                      <ArrowRight size={18} style={{ color: '#334155' }} />
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          <div id="stats" className="senjr-card" style={{
+          <div id="stats" data-observe className="senjr-card" style={{
             overflow: 'hidden', padding: 0, marginBottom: 28,
-            border: '2px solid var(--senjr-text)', boxShadow: '4px 4px 0 var(--senjr-text)',
           }}>
             <div className="senjr-grid-2" style={{ gap: 0 }}>
               {stats.map((s, i) => (
@@ -255,8 +256,6 @@ export default function Landing() {
                 return (
                   <div key={f.title} className="senjr-card-flat" style={{
                     padding: 16, marginBottom: 0,
-                    border: '2px solid var(--senjr-text)',
-                    boxShadow: '2px 2px 0 var(--senjr-text)',
                   }}>
                     <div style={{
                       width: 40, height: 40, borderRadius: 10,
@@ -285,10 +284,8 @@ export default function Landing() {
             </div>
 
             {popularLessons.map((lesson, i) => (
-              <div key={i} className="senjr-card-flat senjr-ripple" style={{
+              <div key={i} className="senjr-card-flat" style={{
                 marginBottom: 16, cursor: 'pointer',
-                border: '2px solid var(--senjr-text)',
-                boxShadow: '2px 2px 0 var(--senjr-text)',
                 transition: 'all 0.2s ease',
               }} onClick={() => navigate('/auth')}>
                 <div style={{
@@ -298,15 +295,20 @@ export default function Landing() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {lesson.icon}
-                  <span className="senjr-tag senjr-tag-orange" style={{
+                  <span style={{
                     position: 'absolute', top: 8, right: 8,
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    padding: '3px 8px', borderRadius: 'var(--senjr-radius-full)',
+                    background: 'var(--senjr-orange-light)', color: 'var(--senjr-orange-dark)',
+                    fontSize: 11, fontWeight: 600,
                   }}>
                     {lesson.badge}
                   </span>
-                  <span className="senjr-tag" style={{
+                  <span style={{
                     position: 'absolute', bottom: 8, left: 8,
+                    padding: '3px 8px', borderRadius: 'var(--senjr-radius-full)',
                     background: 'rgba(255,255,255,0.2)', color: 'white',
-                    border: '1px solid rgba(255,255,255,0.3)',
+                    fontSize: 11, fontWeight: 500,
                   }}>
                     {lesson.duration}
                   </span>
@@ -318,9 +320,10 @@ export default function Landing() {
                 <div className="senjr-flex-between">
                   <div style={{ display: 'flex', gap: 6 }}>
                     {lesson.tags.map((tag) => (
-                      <span key={tag} className="senjr-tag" style={{
+                      <span key={tag} style={{
+                        padding: '2px 8px', borderRadius: 'var(--senjr-radius-full)',
                         background: 'var(--senjr-bg)', color: 'var(--senjr-text-muted)',
-                        border: '1px solid var(--senjr-border)',
+                        fontSize: 11, fontWeight: 500, border: '1px solid var(--senjr-border)',
                       }}>
                         {tag}
                       </span>
@@ -339,11 +342,10 @@ export default function Landing() {
           <div id="cta" data-observe className={`${visibleSections['cta'] ? 'senjr-pop' : ''}`} style={{ marginBottom: 28 }}>
             <div className="senjr-card" style={{
               overflow: 'hidden', padding: 0,
-              background: 'linear-gradient(135deg, var(--senjr-black) 0%, #2D2D44 100%)',
-              border: '2px solid var(--senjr-text)',
-              boxShadow: '4px 4px 0 var(--senjr-text)',
+              background: 'linear-gradient(135deg, var(--senjr-black) 0%, #1E293B 100%)',
+              border: 'none',
             }}>
-              <div style={{ padding: 28, textAlign: 'center', position: 'relative' }}>
+              <div style={{ padding: 28, textAlign: 'center' }}>
                 <Rocket size={48} style={{ color: 'var(--senjr-orange)', margin: '0 auto 12px' }} />
                 <p style={{ fontSize: 16, fontWeight: 700, color: 'white', marginBottom: 4 }}>
                   Apni preparation ko next level le jao
@@ -352,8 +354,8 @@ export default function Landing() {
                   Join 500+ students preparing together with senior mentors
                 </p>
                 <button
-                  className="senjr-btn senjr-btn-orange senjr-ripple"
-                  style={{ width: 'auto', padding: '12px 28px', margin: '0 auto', boxShadow: '3px 3px 0 var(--senjr-orange-dark)' }}
+                  className="senjr-btn senjr-btn-orange"
+                  style={{ width: 'auto', padding: '12px 28px', margin: '0 auto', boxShadow: '0 4px 12px rgba(249,115,22,0.3)' }}
                   onClick={() => navigate('/student-signup')}
                 >
                   Get Started Free <ArrowRight size={18} />

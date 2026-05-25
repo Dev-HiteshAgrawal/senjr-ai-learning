@@ -1,6 +1,6 @@
 # Senjr - AI Learning Platform
 
-A zero-budget AI learning platform for students, mentors, and exam aspirants. Built with React, TypeScript, Vite, and Firebase.
+An AI learning platform for students, mentors, and exam aspirants. Built with React, TypeScript, Vite, and Firebase.
 
 ## Tech Stack (Free Tier Only)
 
@@ -44,63 +44,51 @@ cp .env.example .env
 
 ## Vercel Deployment (Free/Hobby Tier)
 
-### Option 1: Manual Deploy
+**Current status**: Production live at https://senjr-ai-learning.vercel.app
 
-1. Go to [Vercel](https://vercel.com) and sign up (free)
-2. Import your GitHub repository
-3. Add the environment variables in Vercel dashboard:
-   - `VITE_FIREBASE_API_KEY`
-   - `VITE_FIREBASE_AUTH_DOMAIN`
-   - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_STORAGE_BUCKET`
-   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
-   - `VITE_FIREBASE_APP_ID`
-4. Deploy (uses Hobby free tier - no credit card required)
+### Re-deploy on push
+Vercel auto-deploys from GitHub when the repo is linked. Just push to `main`.
 
-### Option 2: GitHub Actions Auto-Deploy
+### Manual Re-deploy (Vercel CLI)
+```bash
+vercel --prod
+```
 
-1. Generate Vercel token: Vercel Dashboard → Settings → Tokens
-2. Add secrets to GitHub repo:
-   - `VERCEL_TOKEN` - your Vercel access token
-   - `VERCEL_ORG_ID` - found in Vercel project settings
-   - `VERCEL_PROJECT_ID` - found in Vercel project settings
-3. Push to main branch - deployment triggers automatically
+### Environment Variables (Vercel Dashboard)
+Add these in Project → Settings → Environment Variables:
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `GROQ_API_KEY` (optional — for AI Tutor)
+
+### GitHub Actions Workflow (Optional)
+`.github/workflows/vercel-deploy.yml` can deploy via Actions if `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` secrets are set. Not required — Vercel's GitHub integration handles this automatically.
+
+## AI Tutor API Keys (Free)
+
+The AI Tutor endpoint (`/api/aiTutor`) requires either a Groq or OpenAI API key:
+
+- **Groq (recommended)**: Sign up free at https://console.groq.com — get a key instantly, no credit card
+- **OpenAI**: Sign up at https://platform.openai.com — free credits included
+
+Set the key in your environment:
+- Local dev: add to `.env.local` as `GROQ_API_KEY=gsk_...` or `OPENAI_API_KEY=sk-...`
+- Vercel: add as environment variable in Vercel dashboard
 
 ## Deployment
 
-See [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) for the complete step-by-step guide including:
-- GitHub repository creation
-- Firebase project setup (Spark free tier)
-- Vercel deployment (Hobby free tier)
-- Post-deploy verification steps
-
-## GitHub Repository Setup
-
-1. Create a new repository on GitHub
-2. Initialize and push:
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: Senjr AI learning platform"
-git branch -M main
-git remote add origin https://github.com/yourusername/senjr.git
-git push -u origin main
-```
-
-3. The CI workflow (`.github/workflows/ci.yml`) runs on every push:
-   - Installs dependencies
-   - Runs linter
-   - Builds the project
-   - Uploads build artifact
+See [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) for the complete step-by-step guide.
 
 ## Auth Architecture
 
 - **Student signup/login**: Email/password or Google
 - **Mentor signup/login**: Email/password or Google
-- **Role separation**: Stored in Firebase user displayName as JSON
-- **Protected dashboards**: Main UI shown after authentication
-- **Mentor verification**: Quality gate with 5 checkpoint fields
+- **Role separation**: Stored in Firestore `users/{uid}.role` field
+- **Protected dashboards**: `ProtectedRoute` component guards by auth + role
+- **Mentor verification**: Admin reviews identity docs before granting mentor access
 
 ## Development Commands
 
@@ -111,25 +99,33 @@ npm run lint     # Run ESLint
 npm run preview  # Preview production build
 ```
 
-## Zero-Budget Operating Rules
+## CI/CD
 
-- No paid Firebase features (stay on Spark tier)
-- No paid Vercel features (stay on Hobby tier)
-- OpenCode free models per task, such as Qwen, DeepSeek, or Nemotron when available
-- Self-host LiveKit path for live rooms (future)
-- Manual outreach before paid ads
+The CI workflow (`.github/workflows/ci.yml`) runs on every push/PR:
+- Installs dependencies
+- Runs linter
+- Builds the project
+- Uploads build artifact
 
 ## Project Structure
 
 ```
 senjr-ai-learning/
 ├── src/
-│   ├── firebase/config.ts    # Firebase initialization
+│   ├── firebase/config.ts       # Firebase initialization
 │   ├── contexts/AuthContext.tsx  # Auth state management
-│   ├── hooks/useAuth.ts      # Auth actions (login/signup)
-│   ├── App.tsx               # Main application
-│   └── main.tsx              # Entry point
-├── .github/workflows/         # CI/CD pipelines
-├── .env.example              # Environment template
+│   ├── hooks/useAuth.ts         # Auth actions (login/signup)
+│   ├── components/              # Reusable components (ProtectedRoute)
+│   ├── pages/                   # Route pages (20+ pages)
+│   ├── services/                # Firestore CRUD, verification, sessions
+│   └── types/firestore.ts       # Firestore schema types
+├── api/
+│   └── aiTutor.ts               # Vercel serverless AI Tutor function
+├── scripts/
+│   └── seed-admin.ts            # Admin user seeding utility
+├── .github/workflows/           # CI/CD pipelines
+├── firestore.rules              # Firestore security rules
+├── firestore.indexes.json       # Firestore composite indexes
+├── .env.example                 # Environment template
 └── package.json
 ```

@@ -34,22 +34,25 @@ export default function WarRoom() {
 
       <div className="senjr-page">
         <div className="senjr-content">
-          <div className="senjr-card" style={{ background: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)', border: 'none', color: 'white', marginBottom: 20 }}>
+          <div className="senjr-card" style={{
+            background: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
+            border: 'none', color: 'white', marginBottom: 20,
+          }}>
             <div className="senjr-stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-              <div className="senjr-stat-card" style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'center', padding: 12 }}>
+              <div style={{ textAlign: 'center', padding: 12 }}>
                 <Clock size={18} style={{ margin: '0 auto 4px', opacity: 0.8 }} />
-                <p className="senjr-stat-value" style={{ fontSize: 18, color: 'white' }}>42<span style={{ fontSize: 12 }}> hrs</span></p>
-                <p className="senjr-stat-label" style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Study Time</p>
+                <p style={{ fontSize: 18, fontWeight: 700, color: 'white' }}>42<span style={{ fontSize: 12 }}> hrs</span></p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Study Time</p>
               </div>
-              <div className="senjr-stat-card" style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'center', padding: 12 }}>
+              <div style={{ textAlign: 'center', padding: 12 }}>
                 <Brain size={18} style={{ margin: '0 auto 4px', opacity: 0.8 }} />
-                <p className="senjr-stat-value" style={{ fontSize: 18, color: 'white' }}>156</p>
-                <p className="senjr-stat-label" style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Tests</p>
+                <p style={{ fontSize: 18, fontWeight: 700, color: 'white' }}>156</p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Tests</p>
               </div>
-              <div className="senjr-stat-card" style={{ background: 'rgba(255,255,255,0.1)', textAlign: 'center', padding: 12 }}>
+              <div style={{ textAlign: 'center', padding: 12 }}>
                 <Trophy size={18} style={{ margin: '0 auto 4px', opacity: 0.8 }} />
-                <p className="senjr-stat-value" style={{ fontSize: 18, color: 'white' }}>78%</p>
-                <p className="senjr-stat-label" style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Avg Score</p>
+                <p style={{ fontSize: 18, fontWeight: 700, color: 'white' }}>78%</p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Avg Score</p>
               </div>
             </div>
           </div>
@@ -65,10 +68,10 @@ export default function WarRoom() {
 
           {activeTab === 'exams' && (
             <>
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8, textTransform: 'uppercase' }}>Select Exam Type</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Select Exam Type</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
                 {examTypes.map((exam) => (
-                  <button key={exam.id} style={{ padding: 14, borderRadius: 12, background: exam.bg, border: 'none', cursor: 'pointer', textAlign: 'center' }}>
+                  <button key={exam.id} style={{ padding: 14, borderRadius: 12, background: exam.bg, border: '1px solid var(--senjr-border)', cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s ease' }}>
                     <div style={{ color: exam.color, marginBottom: 4 }}>{exam.icon}</div>
                     <p style={{ fontSize: 13, fontWeight: 600 }}>{exam.label}</p>
                     <p style={{ fontSize: 10, color: 'var(--senjr-text-muted)' }}>{exam.desc}</p>
@@ -76,11 +79,19 @@ export default function WarRoom() {
                 ))}
               </div>
 
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8, textTransform: 'uppercase' }}>Upcoming & Past Exams</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upcoming & Past Exams</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {exams.map((exam) => (
-                  <div key={exam.id} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, border: exam.score ? '1px solid var(--senjr-green-light)' : undefined }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: examTypes.find(e => e.id === exam.type)?.bg || '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: examTypes.find(e => e.id === exam.type)?.color || '#6B7280' }}>
+                  <div key={exam.id} className="senjr-card" style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: 14,
+                    background: exam.score ? 'var(--senjr-green-lighter)' : 'white',
+                  }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 10,
+                      background: examTypes.find(e => e.id === exam.type)?.bg || '#F3F4F6',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: examTypes.find(e => e.id === exam.type)?.color || '#6B7280',
+                    }}>
                       {examTypes.find(e => e.id === exam.type)?.icon || <BookOpen size={18} />}
                     </div>
                     <div style={{ flex: 1 }}>
@@ -97,7 +108,7 @@ export default function WarRoom() {
                         <p style={{ fontSize: 10, color: 'var(--senjr-text-muted)' }}>Score</p>
                       </div>
                     ) : (
-                      <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white', width: 'auto', padding: '8px 14px', fontSize: 12 }}>Start</button>
+                      <button className="senjr-btn senjr-btn-sm" style={{ background: 'var(--senjr-green)', color: 'white' }}>Start</button>
                     )}
                   </div>
                 ))}
@@ -107,25 +118,25 @@ export default function WarRoom() {
 
           {activeTab === 'practice' && (
             <>
-              <div className="senjr-card" style={{ background: 'linear-gradient(135deg, #ECFDF5, #FFF7ED)', border: 'none', marginBottom: 20, textAlign: 'center', padding: 24 }}>
-                <Shield size={32} style={{ color: 'var(--senjr-green)', marginBottom: 8, margin: '0 auto 8px' }} />
+              <div className="senjr-card-green" style={{ marginBottom: 20, textAlign: 'center', padding: 24 }}>
+                <Shield size={32} style={{ color: 'var(--senjr-green-dark)', margin: '0 auto 8px' }} />
                 <p style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>AI Practice Session</p>
                 <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 12 }}>Practice any topic with AI-generated questions</p>
-                <button className="senjr-btn" style={{ background: 'var(--senjr-green)', color: 'white', margin: '0 auto', fontSize: 13 }}><Sparkles size={14} /> Start Practice</button>
+                <button className="senjr-btn senjr-btn-green senjr-btn-sm" style={{ margin: '0 auto', fontSize: 13 }}><Sparkles size={14} /> Start Practice</button>
               </div>
 
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8, textTransform: 'uppercase' }}>Focus Areas</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Focus Areas</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
                 {weakTopics.map((topic) => (
-                  <div key={topic} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--senjr-border)', padding: 10 }}>
+                  <div key={topic} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 12, background: 'var(--senjr-orange-lighter)' }}>
                     <Target size={14} style={{ color: 'var(--senjr-orange)', flexShrink: 0 }} />
                     <span style={{ fontSize: 13, flex: 1 }}>{topic}</span>
-                    <span className="senjr-badge" style={{ background: '#FEF3C7', color: '#D97706' }}>Weak</span>
+                    <span className="senjr-tag senjr-tag-orange">Weak</span>
                   </div>
                 ))}
               </div>
 
-              <button className="senjr-btn" style={{ background: 'var(--senjr-orange)', color: 'white' }}>Generate Custom Quiz <Sparkles size={16} /></button>
+              <button className="senjr-btn senjr-btn-orange">Generate Custom Quiz <Sparkles size={16} /></button>
             </>
           )}
 
@@ -158,7 +169,7 @@ export default function WarRoom() {
                 ))}
               </div>
 
-              <button className="senjr-btn" style={{ background: 'transparent', border: '1.5px solid var(--senjr-border)', color: 'var(--senjr-text)' }}>View Detailed Report <ChevronRight size={16} /></button>
+              <button className="senjr-btn senjr-btn-outline">View Detailed Report <ChevronRight size={16} /></button>
             </>
           )}
         </div>

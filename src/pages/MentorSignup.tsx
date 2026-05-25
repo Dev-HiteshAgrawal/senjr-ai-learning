@@ -32,8 +32,10 @@ export default function MentorSignup() {
           updatedAt: new Date().toISOString(),
         }, { merge: true })
       }
-    } catch {}
-    navigate('/onboarding/mentor/verify')
+     } catch (error) {
+       console.error('Error in mentor signup:', error)
+     }
+     navigate('/onboarding/mentor/verify')
   }
 
   return (
@@ -48,22 +50,24 @@ export default function MentorSignup() {
 
       <div className="senjr-page">
         <div className="senjr-content" style={{ paddingTop: 20 }}>
-          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--senjr-green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: 'var(--senjr-green)' }}>
+          <div className="senjr-pop" style={{ width: 60, height: 60, borderRadius: 16, background: 'var(--senjr-green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: 'var(--senjr-green)', border: '2px solid var(--senjr-green-dark)' }}>
             <GraduationCap size={28} />
           </div>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>Become a Mentor</h2>
-          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>Share your knowledge and earn while mentoring</p>
+          <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4, letterSpacing: '-0.3px' }}>Become a Mentor</h2>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>Share your knowledge and earn while mentoring students</p>
 
           <div className="senjr-input-group" style={{ marginBottom: 20 }}>
-            <label className="senjr-input-label">Full Name *</label>
-            <input className="senjr-input" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} />
+            <label className="senjr-input-label">Full Name</label>
+            <input className="senjr-input" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} style={{ border: '2px solid var(--senjr-border)' }} />
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Which best describes you?</p>
+          <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 4, height: 16, borderRadius: 2, background: 'var(--senjr-green)' }} />Which best describes you?
+          </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
             {roleOptions.map((role) => (
               <button key={role.id} onClick={() => setSelectedRole(role.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 12, background: selectedRole === role.id ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'var(--senjr-bg)', border: selectedRole === role.id ? '1.5px solid var(--senjr-green)' : '1px solid var(--senjr-border)', cursor: 'pointer', transition: 'all 0.15s' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 12, background: selectedRole === role.id ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'white', border: selectedRole === role.id ? '2px solid var(--senjr-green)' : '2px solid var(--senjr-border)', cursor: 'pointer', transition: 'all 0.15s', boxShadow: selectedRole === role.id ? '2px 2px 0 var(--senjr-green-dark)' : 'none' }}>
                 <div style={{ color: selectedRole === role.id ? 'var(--senjr-green)' : 'var(--senjr-text-muted)' }}>{role.icon}</div>
                 <div style={{ textAlign: 'left', flex: 1 }}>
                   <p style={{ fontSize: 14, fontWeight: 600 }}>{role.label}</p>
@@ -74,7 +78,7 @@ export default function MentorSignup() {
             ))}
           </div>
 
-          <button className="senjr-btn" style={{ background: selectedRole && name.trim() ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedRole && name.trim() ? 'white' : 'var(--senjr-text-muted)' }} disabled={!selectedRole || !name.trim()} onClick={handleContinue}>
+          <button className="senjr-btn" style={{ background: selectedRole && name.trim() ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedRole && name.trim() ? 'white' : 'var(--senjr-text-muted)', boxShadow: selectedRole && name.trim() ? '3px 3px 0 var(--senjr-green-dark)' : 'none' }} disabled={!selectedRole || !name.trim()} onClick={handleContinue}>
             Continue <ArrowRight size={18} />
           </button>
         </div>

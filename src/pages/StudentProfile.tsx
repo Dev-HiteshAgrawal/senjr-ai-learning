@@ -36,7 +36,7 @@ export default function StudentProfile() {
   }
 
   return (
-    <div className="senjr-app">
+    <div className="senjr-app" style={{ background: 'linear-gradient(180deg, var(--senjr-green-bg) 0%, var(--senjr-bg) 100%)' }}>
       <header className="senjr-header">
         <div />
         <div style={{ display: 'flex', gap: 4 }}>
@@ -47,19 +47,23 @@ export default function StudentProfile() {
 
       <div className="senjr-page">
         <div className="senjr-content" style={{ paddingTop: 20 }}>
-          <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--senjr-bg)', border: '3px dashed var(--senjr-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', cursor: 'pointer', position: 'relative' }}>
-            <User size={32} style={{ color: 'var(--senjr-text-muted)' }} />
-            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: '50%', background: 'var(--senjr-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+          <div style={{ position: 'relative', width: 88, height: 88, margin: '0 auto 20px' }}>
+            <div style={{ width: 88, height: 88, borderRadius: '50%', background: 'var(--senjr-bg)', border: '3px dashed var(--senjr-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <User size={36} style={{ color: 'var(--senjr-text-muted)' }} />
+            </div>
+            <div style={{ position: 'absolute', bottom: 2, right: 2, width: 30, height: 30, borderRadius: '50%', background: 'var(--senjr-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: '2px solid white', boxShadow: '2px 2px 0 var(--senjr-green-dark)' }}>
               <Camera size={14} />
             </div>
           </div>
 
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6, textAlign: 'center' }}>Almost Done!</h2>
-          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', textAlign: 'center', marginBottom: 32 }}>Set up your profile to get started</p>
+          <div className="senjr-card-neo" style={{ textAlign: 'center', padding: 16, marginBottom: 24, background: 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' }}>
+            <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 4, letterSpacing: '-0.3px' }}>Almost Done!</h2>
+            <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>Set up your profile to get started</p>
+          </div>
 
           <div className="senjr-input-group" style={{ marginBottom: 16 }}>
-            <label className="senjr-input-label">Full Name *</label>
-            <input className="senjr-input" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} />
+            <label className="senjr-input-label">Full Name</label>
+            <input className="senjr-input" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} style={{ border: '2px solid var(--senjr-border)' }} />
           </div>
 
           <div className="senjr-input-group" style={{ marginBottom: 16 }}>
@@ -72,7 +76,7 @@ export default function StudentProfile() {
             <input className="senjr-input" placeholder="Your city" value={city} onChange={(e) => setCity(e.target.value)} />
           </div>
 
-          <button className="senjr-btn" style={{ background: name.trim() ? 'var(--senjr-green)' : 'var(--senjr-border)', color: name.trim() ? 'white' : 'var(--senjr-text-muted)' }} disabled={!name.trim() || loading} onClick={handleComplete}>
+          <button className="senjr-btn senjr-btn-green" style={{ boxShadow: name.trim() && !loading ? '3px 3px 0 var(--senjr-green-dark)' : 'none', opacity: !name.trim() || loading ? 0.6 : 1 }} disabled={!name.trim() || loading} onClick={handleComplete}>
             {loading ? <><Loader2 size={18} className="animate-spin" /> Setting up...</> : <>Complete Setup <ArrowRight size={18} /></>}
           </button>
         </div>

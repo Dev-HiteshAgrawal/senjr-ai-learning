@@ -42,7 +42,7 @@ export default function StudentSignup() {
     <div className="senjr-app" style={{ background: 'linear-gradient(180deg, var(--senjr-green-bg) 0%, var(--senjr-bg) 100%)' }}>
       <header className="senjr-header" style={{ background: 'transparent', border: 'none' }}>
         <button className="senjr-header-back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></button>
-        <span className="senjr-header-title">Create Account</span>
+        <span className="senjr-header-title" style={{ fontWeight: 700 }}>Create Account</span>
         <div style={{ width: 36 }} />
       </header>
 
@@ -55,9 +55,9 @@ export default function StudentSignup() {
 
       <div className="senjr-page">
         <div className="senjr-content">
-          <div className="senjr-card-green" style={{ marginBottom: 24, textAlign: 'center' }}>
-            <p style={{ fontSize: 14, fontWeight: 600 }}>Apni journey shuru karein!</p>
-            <p style={{ fontSize: 12, color: 'var(--senjr-text-muted)' }}>Apna profile complete karein</p>
+          <div className="senjr-card-neo-green" style={{ marginBottom: 20, textAlign: 'center', padding: 20 }}>
+            <p style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Apni journey shuru karein!</p>
+            <p style={{ fontSize: 13, color: 'var(--senjr-green-dark)' }}>Apna profile complete karein</p>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -72,7 +72,7 @@ export default function StudentSignup() {
             <div className="senjr-input-group">
               <label className="senjr-input-label">Phone Number</label>
               <div style={{ display: 'flex', gap: 8 }}>
-                <input className="senjr-input" style={{ width: 70, textAlign: 'center' }} value="+91" readOnly />
+                <div style={{ padding: '11px 14px', borderRadius: 'var(--senjr-radius)', border: '1.5px solid var(--senjr-border)', background: 'var(--senjr-bg)', fontSize: 15, fontWeight: 600, color: 'var(--senjr-text-muted)', width: 80, textAlign: 'center' }}>+91</div>
                 <input className="senjr-input" type="tel" placeholder="98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} required style={{ flex: 1 }} />
               </div>
             </div>

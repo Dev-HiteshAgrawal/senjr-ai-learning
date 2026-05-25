@@ -36,7 +36,7 @@ export default function AdminPanel() {
     { label: 'Total Users', value: '156', change: '+12%' },
     { label: 'Active Mentors', value: '23', change: null as string | null },
     { label: "Today's Sessions", value: '8', change: null as string | null },
-    { label: 'Revenue', value: '₹4,200', change: null as string | null },
+    { label: 'Revenue', value: '\u20B94,200', change: null as string | null },
   ]
 
   const contentReviewQueue = [
@@ -72,7 +72,7 @@ export default function AdminPanel() {
       const pending = Array.from(mentorMap.values()).map(m => {
         let riskLevel: 'low' | 'medium' | 'high' = 'low'
         for (const doc of m.documents) {
-          const flags = getVerificationFlags(doc, m.documents, m.mentorName)
+          const flags = getVerificationFlags(doc, m.documents)
           if (flags.duplicateHash || flags.suspicious) riskLevel = 'high'
           else if (flags.mismatchedNames || flags.lowQuality) riskLevel = 'medium'
         }
@@ -85,7 +85,12 @@ export default function AdminPanel() {
   }
 
   useEffect(() => {
-    if (activeTab === 'verification') { fetchPendingVerifications() }
+    if (activeTab === 'verification') {
+      const fetchData = async () => {
+        await fetchPendingVerifications()
+      }
+      fetchData()
+    }
   }, [activeTab])
 
   const handleReview = async (docId: string, status: DocumentStatus) => {
@@ -169,7 +174,7 @@ export default function AdminPanel() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => selectedMentor.documents.forEach(d => handleReview(d.id, 'needs_clarification'))} className="senjr-btn senjr-btn-sm" style={{ flex: 1, border: '1px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>
+            <button onClick={() => selectedMentor.documents.forEach(d => handleReview(d.id, 'needs_clarification'))} className="senjr-btn senjr-btn-sm" style={{ flex: 1, border: '1.5px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>
               <MessageSquare size={14} style={{ display: 'inline', marginRight: 4 }} /> Request Clarification
             </button>
             <button onClick={() => setShowReviewModal(false)} className="senjr-btn senjr-btn-sm" style={{ padding: '8px 16px' }}>Close</button>
@@ -181,10 +186,10 @@ export default function AdminPanel() {
 
   return (
     <div className="senjr-app">
-      <header className="senjr-header" style={{ background: 'var(--senjr-black)', color: 'white', border: 'none' }}>
+      <header className="senjr-header" style={{ background: 'var(--senjr-bg-card)', borderBottom: '1px solid var(--senjr-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--senjr-green)' }}>SENJR</span>
-          <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>Admin</span>
+          <span className="senjr-badge senjr-badge-orange">Admin</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -215,7 +220,7 @@ export default function AdminPanel() {
             <>
               <div className="senjr-grid-2" style={{ marginBottom: 24 }}>
                 {stats.map((s) => (
-                  <div key={s.label} className="senjr-card" style={{ border: 'none', marginBottom: 0 }}>
+                  <div key={s.label} className="senjr-card" style={{ marginBottom: 0 }}>
                     <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)', marginBottom: 4, fontWeight: 600 }}>{s.label.toUpperCase()}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: s.label === 'Revenue' ? 22 : 28, fontWeight: 800 }}>{s.value}</span>
@@ -226,21 +231,21 @@ export default function AdminPanel() {
               </div>
 
               <h2 className="senjr-section-title" style={{ fontSize: 16, marginBottom: 12 }}>Pending Actions</h2>
-              <div className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, border: 'none', marginBottom: 8, cursor: 'pointer' }} onClick={() => setActiveTab('verification')}>
+              <div className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, cursor: 'pointer' }} onClick={() => setActiveTab('verification')}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Shield size={20} style={{ color: 'var(--senjr-orange)' }} />
                 </div>
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: 'var(--senjr-orange)' }}>{pendingCount} Mentor Verifications Pending</span>
                 <ChevronRight size={18} style={{ color: 'var(--senjr-text-muted)' }} />
               </div>
-              <div className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, border: 'none', marginBottom: 8, cursor: 'pointer' }} onClick={() => setActiveTab('content')}>
+              <div className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, cursor: 'pointer' }} onClick={() => setActiveTab('content')}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CreditCard size={20} style={{ color: '#8B5CF6' }} />
                 </div>
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: '#8B5CF6' }}>3 Payments to Verify</span>
                 <ChevronRight size={18} style={{ color: 'var(--senjr-text-muted)' }} />
               </div>
-              <div className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, border: 'none', marginBottom: 8 }}>
+              <div className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Megaphone size={20} style={{ color: '#EF4444' }} />
                 </div>
@@ -250,7 +255,7 @@ export default function AdminPanel() {
 
               <h2 className="senjr-section-title" style={{ fontSize: 16, marginTop: 24, marginBottom: 12 }}>Recent Signups</h2>
               {recentSignups.map((u) => (
-                <div key={u.email} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, border: 'none' }}>
+                <div key={u.email} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                   <div className="senjr-avatar" style={{ width: 40, height: 40, fontSize: 14, background: 'var(--senjr-green-lighter)' }}>{u.avatar || u.name.slice(0, 2).toUpperCase()}</div>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: 14, fontWeight: 600 }}>{u.name}</p>
@@ -290,7 +295,7 @@ export default function AdminPanel() {
                 pendingMentors.map((v) => {
                   const riskStyle = getRiskBadgeColor(v.riskLevel)
                   return (
-                    <div key={v.mentorId} className="senjr-card" style={{ marginBottom: 16, border: 'none' }}>
+                    <div key={v.mentorId} className="senjr-card" style={{ marginBottom: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                           <div className="senjr-avatar" style={{ width: 44, height: 44, fontSize: 16, background: riskStyle.bg, color: riskStyle.color }}>
@@ -321,7 +326,7 @@ export default function AdminPanel() {
                         <button onClick={() => openReviewModal(v)} className="senjr-btn senjr-btn-sm" style={{ flex: 1, background: 'var(--senjr-green)', color: 'white', borderRadius: 'var(--senjr-radius)' }}>
                           <Eye size={14} style={{ display: 'inline', marginRight: 4 }} /> Review
                         </button>
-                        <button className="senjr-btn senjr-btn-sm" style={{ padding: '8px 12px', border: '1px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>
+                        <button className="senjr-btn senjr-btn-sm" style={{ padding: '8px 12px', border: '1.5px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>
                           <Download size={14} />
                         </button>
                       </div>
@@ -339,7 +344,7 @@ export default function AdminPanel() {
                 <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)' }}>Review and approve mentor resources</p>
               </div>
               {contentReviewQueue.map((c) => (
-                <div key={c.id} className="senjr-card" style={{ marginBottom: 12, border: 'none' }}>
+                <div key={c.id} className="senjr-card" style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                     <div style={{ width: 44, height: 44, borderRadius: 10, background: 'var(--senjr-green-lighter)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FileText size={20} style={{ color: 'var(--senjr-green)' }} />
@@ -355,10 +360,10 @@ export default function AdminPanel() {
                     <button className="senjr-btn senjr-btn-sm" style={{ flex: 1, background: 'var(--senjr-green)', color: 'white', borderRadius: 'var(--senjr-radius)' }}>
                       <CheckCircle size={14} style={{ display: 'inline', marginRight: 4 }} /> Approve
                     </button>
-                    <button className="senjr-btn senjr-btn-sm" style={{ flex: 1, background: '#FEF2F2', color: '#EF4444', borderRadius: 'var(--senjr-radius)', border: '1px solid #EF4444' }}>
+                    <button className="senjr-btn senjr-btn-sm" style={{ flex: 1, background: '#FEF2F2', color: '#EF4444', borderRadius: 'var(--senjr-radius)', border: '1.5px solid #EF4444' }}>
                       <XCircle size={14} style={{ display: 'inline', marginRight: 4 }} /> Reject
                     </button>
-                    <button className="senjr-btn senjr-btn-sm" style={{ padding: '8px 12px', border: '1px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>
+                    <button className="senjr-btn senjr-btn-sm" style={{ padding: '8px 12px', border: '1.5px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>
                       <Eye size={14} />
                     </button>
                   </div>
@@ -378,7 +383,7 @@ export default function AdminPanel() {
                 <input className="senjr-input" style={{ paddingLeft: 40 }} placeholder="Search users..." />
               </div>
               {recentSignups.map((u) => (
-                <div key={u.email} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, border: 'none' }}>
+                <div key={u.email} className="senjr-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                   <div className="senjr-avatar" style={{ width: 40, height: 40, fontSize: 14, background: 'var(--senjr-green-lighter)' }}>{u.avatar || u.name.slice(0, 2).toUpperCase()}</div>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: 14, fontWeight: 600 }}>{u.name}</p>
@@ -390,7 +395,7 @@ export default function AdminPanel() {
                   </div>
                 </div>
               ))}
-              <button className="senjr-btn senjr-btn-sm" style={{ marginTop: 16, border: '1px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>View All Users</button>
+              <button className="senjr-btn senjr-btn-sm" style={{ marginTop: 16, border: '1.5px solid var(--senjr-border)', borderRadius: 'var(--senjr-radius)' }}>View All Users</button>
             </>
           )}
         </div>

@@ -65,17 +65,19 @@ export default function StudentGoals() {
 
       <div className="senjr-page">
         <div className="senjr-content" style={{ paddingTop: 20 }}>
-          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--senjr-orange-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: 'var(--senjr-orange)' }}>
+          <div className="senjr-pop" style={{ width: 60, height: 60, borderRadius: 16, background: 'var(--senjr-orange-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: 'var(--senjr-orange)', border: '2px solid var(--senjr-orange-dark)' }}>
             <Target size={28} />
           </div>
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}>Your Goals</h2>
-          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>What do you want to achieve?</p>
+          <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4, letterSpacing: '-0.3px' }}>Your Goals</h2>
+          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 24 }}>What do you want to achieve on Senjr?</p>
 
-          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Select your learning goals</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 24 }}>
+          <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 4, height: 16, borderRadius: 2, background: 'var(--senjr-green)' }} />Select your learning goals
+          </p>
+          <div className="senjr-grid-2" style={{ marginBottom: 24 }}>
             {goals.map((goal) => (
               <button key={goal.id} onClick={() => toggleGoal(goal.id)}
-                style={{ padding: 16, borderRadius: 12, textAlign: 'center', background: selectedGoals.includes(goal.id) ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'var(--senjr-bg)', border: selectedGoals.includes(goal.id) ? '1.5px solid var(--senjr-green)' : '1px solid var(--senjr-border)', cursor: 'pointer', transition: 'all 0.15s' }}>
+                style={{ padding: 16, borderRadius: 12, textAlign: 'center', background: selectedGoals.includes(goal.id) ? 'linear-gradient(135deg, #ECFDF5, #FFF7ED)' : 'white', border: selectedGoals.includes(goal.id) ? '2px solid var(--senjr-green)' : '2px solid var(--senjr-border)', cursor: 'pointer', transition: 'all 0.15s', boxShadow: selectedGoals.includes(goal.id) ? '2px 2px 0 var(--senjr-green-dark)' : 'none' }}>
                 <div style={{ color: selectedGoals.includes(goal.id) ? 'var(--senjr-green)' : 'var(--senjr-text-muted)', marginBottom: 6 }}>{goal.icon}</div>
                 <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{goal.label}</p>
                 <p style={{ fontSize: 10, color: 'var(--senjr-text-muted)' }}>{goal.desc}</p>
@@ -83,23 +85,34 @@ export default function StudentGoals() {
             ))}
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Topics you find difficult (optional)</p>
+          <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 4, height: 16, borderRadius: 2, background: 'var(--senjr-orange)' }} />Topics you find difficult
+          </p>
           <div className="senjr-chip-group" style={{ marginBottom: 24 }}>
             {weaknesses.map((w) => (
-              <button key={w} className={`senjr-chip ${selectedWeaknesses.includes(w) ? 'senjr-chip-active' : ''}`} onClick={() => toggleWeakness(w)}>{w}</button>
+              <button key={w}
+                style={{
+                  padding: '8px 16px', borderRadius: 'var(--senjr-radius-full)', fontSize: 13, fontWeight: 500,
+                  background: selectedWeaknesses.includes(w) ? 'var(--senjr-green)' : 'white',
+                  color: selectedWeaknesses.includes(w) ? 'white' : 'var(--senjr-text-secondary)',
+                  border: selectedWeaknesses.includes(w) ? '2px solid var(--senjr-green-dark)' : '2px solid var(--senjr-border)',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                  boxShadow: selectedWeaknesses.includes(w) ? '2px 2px 0 var(--senjr-green-dark)' : 'none',
+                }}
+                onClick={() => toggleWeakness(w)}>{w}</button>
             ))}
           </div>
 
           {selectedGoals.includes('exams') && (
             <div className="senjr-input-group" style={{ marginBottom: 24 }}>
-              <label className="senjr-input-label">Target Exam (optional)</label>
+              <label className="senjr-input-label">Target Exam</label>
               <input className="senjr-input" placeholder="E.g. JEE Advanced 2025" value={targetExam} onChange={(e) => setTargetExam(e.target.value)} />
             </div>
           )}
 
           <div style={{ display: 'flex', gap: 12 }}>
-            <button className="senjr-btn" style={{ background: 'transparent', color: 'var(--senjr-text)', border: '1px solid var(--senjr-border)', width: 'auto' }} onClick={() => navigate('/onboarding/student/education')}>Back</button>
-            <button className="senjr-btn" style={{ background: selectedGoals.length > 0 && !saving ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedGoals.length > 0 && !saving ? 'white' : 'var(--senjr-text-muted)', flex: 1 }} disabled={selectedGoals.length === 0 || saving} onClick={handleContinue}>
+            <button className="senjr-btn" style={{ background: 'transparent', color: 'var(--senjr-text)', border: '2px solid var(--senjr-border)', width: 'auto' }} onClick={() => navigate('/onboarding/student/education')}>Back</button>
+            <button className="senjr-btn" style={{ background: selectedGoals.length > 0 && !saving ? 'var(--senjr-green)' : 'var(--senjr-border)', color: selectedGoals.length > 0 && !saving ? 'white' : 'var(--senjr-text-muted)', flex: 1, boxShadow: selectedGoals.length > 0 && !saving ? '3px 3px 0 var(--senjr-green-dark)' : 'none' }} disabled={selectedGoals.length === 0 || saving} onClick={handleContinue}>
               {saving ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : <>Continue <ArrowRight size={18} /></>}
             </button>
           </div>
