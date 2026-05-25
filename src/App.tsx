@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
 import Landing from './pages/Landing'
 import Auth from './pages/Auth'
 import StudentSignup from './pages/StudentSignup'
@@ -25,26 +24,23 @@ import MockTest from './pages/MockTest'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Public routes - accessible without authentication
-function PublicRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
-}
+const publicRoutes = (
+  <>
+    <Route path="/" element={<Landing />} />
+    <Route path="/auth" element={<Auth />} />
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </>
+)
 
 // Protected routes - require authentication
-function ProtectedRoutes() {
-  return (
-    <Routes>
-      {/* Role-based dashboard routes */}
-      <Route path="/dashboard/student" element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <StudentDashboard />
-        </ProtectedRoute>
-      } />
+const protectedRoutes = (
+  <>
+    {/* Role-based dashboard routes */}
+    <Route path="/dashboard/student" element={
+      <ProtectedRoute allowedRoles={['student']}>
+        <StudentDashboard />
+      </ProtectedRoute>
+    } />
       <Route path="/dashboard/mentor" element={
         <ProtectedRoute allowedRoles={['mentor']}>
           <MentorHub />
@@ -193,19 +189,16 @@ function ProtectedRoutes() {
           <MentorHub />
         </ProtectedRoute>
       } />
-    </Routes>
-  )
-}
+  </>
+)
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {PublicRoutes().props.children}
-          {ProtectedRoutes().props.children}
-        </Routes>
-      </AuthProvider>
+      <Routes>
+        {publicRoutes}
+        {protectedRoutes}
+      </Routes>
     </BrowserRouter>
   )
 }
