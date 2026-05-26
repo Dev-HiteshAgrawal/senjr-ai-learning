@@ -43,6 +43,7 @@ qa_*.md
 issue_*.txt
 *_VERIFICATION.txt
 *_verification.txt
+*_CONFIRMATION.txt
 
 # Pipeline / CI artifact files
 build_*.txt
