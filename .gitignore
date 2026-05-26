@@ -41,7 +41,8 @@ qa_*.md
 *_report.txt
 *_note.txt
 issue_*.txt
-final_verification.txt
+*_VERIFICATION.txt
+*_verification.txt
 
 # Pipeline / CI artifact files
 build_*.txt
