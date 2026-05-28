@@ -1,13 +1,21 @@
-import { useContext } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trophy, BookOpen, Target, BarChart3, Search, Bell, Sparkles, Clock, TrendingUp, Flame, ChevronRight, Zap, GraduationCap, Star, Check, Sun } from 'lucide-react'
 import { AuthContext } from '../contexts/AuthContext'
+
+const FIFTEEN_MIN = 15 * 60 * 1000
 
 export default function StudentDashboard() {
   const navigate = useNavigate()
   const auth = useContext(AuthContext)
   const user = auth?.user ?? null
   const displayName = user?.displayName?.split(' ')[0] || 'Student'
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
 
   const quickActions = [
     { icon: Search, label: 'Find Mentor', color: '#FFF7ED', iconColor: 'var(--senjr-orange)', route: '/book-session' },
@@ -16,10 +24,20 @@ export default function StudentDashboard() {
     { icon: Sparkles, label: 'AI Tutor', color: '#F0FDF4', iconColor: 'var(--senjr-green)', route: '/ai-tutor' },
   ]
 
+  const sessionStart = new Date(now + 5 * 60 * 1000)
+  const joinWindowStart = new Date(sessionStart.getTime() - FIFTEEN_MIN)
+  const canJoin = now >= joinWindowStart.getTime()
+  const isLive = now >= sessionStart.getTime()
+  const sessionEnd = new Date(sessionStart.getTime() + 60 * 60 * 1000)
+  const isOver = now >= sessionEnd.getTime()
+  const diffMs = sessionStart.getTime() - now
+  const countdownMin = Math.floor(diffMs / 60000)
+  const countdownSec = Math.floor((diffMs % 60000) / 1000)
+
   const todaySession = {
     title: 'UP Police Prep with Rahul Sir',
-    time: 'Today, 4:00 PM',
-    countdown: 'Starts in 2h 15m',
+    time: sessionStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+    displayTime: sessionStart.toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }),
     topic: 'Reasoning & GK Strategy',
   }
 
@@ -137,21 +155,47 @@ export default function StudentDashboard() {
               <div className="senjr-flex-between" style={{ marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Clock size={16} style={{ color: 'var(--senjr-orange)' }} />
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-orange-dark)' }}>UPCOMING SESSION</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--senjr-orange-dark)' }}>
+                    {isOver ? 'SESSION COMPLETED' : isLive ? 'LIVE NOW' : 'UPCOMING SESSION'}
+                  </span>
                 </div>
-                <span style={{
-                  padding: '3px 8px', borderRadius: 'var(--senjr-radius-full)',
-                  background: 'var(--senjr-orange-light)', color: 'var(--senjr-orange-dark)',
-                  fontSize: 11, fontWeight: 600,
-                }}>{todaySession.countdown}</span>
+                {!isOver && !isLive && (
+                  <span style={{
+                    padding: '3px 8px', borderRadius: 'var(--senjr-radius-full)',
+                    background: 'var(--senjr-orange-light)', color: 'var(--senjr-orange-dark)',
+                    fontSize: 11, fontWeight: 600, fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {canJoin ? 'Join window open' : `Starts in ${countdownMin}m ${countdownSec}s`}
+                  </span>
+                )}
+                {isLive && !isOver && (
+                  <span style={{
+                    padding: '3px 8px', borderRadius: 'var(--senjr-radius-full)',
+                    background: '#FEE2E2', color: '#DC2626',
+                    fontSize: 11, fontWeight: 600,
+                    animation: 'pulse 2s infinite',
+                  }}>
+                    In Progress
+                  </span>
+                )}
               </div>
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{todaySession.title}</h3>
               <p style={{ fontSize: 13, color: 'var(--senjr-text-muted)', marginBottom: 14 }}>
-                {todaySession.time} &bull; {todaySession.topic}
+                {todaySession.displayTime} &bull; {todaySession.topic}
               </p>
-              <button className="senjr-btn senjr-btn-orange" style={{ padding: '10px 0' }} onClick={() => navigate('/live-session')}>
-                Join Now
-              </button>
+              {isOver ? (
+                <button className="senjr-btn" style={{ padding: '10px 0', background: 'var(--senjr-border)', color: 'var(--senjr-text-muted)', cursor: 'not-allowed' }} disabled>
+                  Completed
+                </button>
+              ) : canJoin ? (
+                <button className="senjr-btn senjr-btn-orange" style={{ padding: '10px 0' }} onClick={() => navigate('/live-session')}>
+                  {isLive ? 'Join Now' : 'Join Early'}
+                </button>
+              ) : (
+                <button className="senjr-btn" style={{ padding: '10px 0', background: 'var(--senjr-border)', color: 'var(--senjr-text-muted)', cursor: 'not-allowed' }} disabled>
+                  Join available {countdownMin}m before
+                </button>
+              )}
             </div>
           </div>
 

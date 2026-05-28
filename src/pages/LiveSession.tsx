@@ -5,7 +5,7 @@ import { ArrowLeft, Mic, MicOff, Camera, CameraOff, MonitorUp, BookOpenCheck, Ha
 /* eslint-disable react-hooks/refs -- refs accessed only in useCallback event handlers */
 export default function LiveSession() {
   const navigate = useNavigate()
-  const [micOn, setMicOn] = useState(true)
+  const [micOn, setMicOn] = useState(false)
   const [cameraOn, setCameraOn] = useState(false)
   const [screenOn, setScreenOn] = useState(false)
   const [transcriptOn, setTranscriptOn] = useState(true)
@@ -209,7 +209,7 @@ export default function LiveSession() {
                 </button>
               )
             })}
-            <button onClick={() => navigate('/dashboard')} title="Leave"
+            <button onClick={() => navigate('/dashboard/student')} title="Leave"
               style={{
                 width: 52, height: 52, borderRadius: 14,
                 background: '#DC2626', color: 'white',
@@ -300,6 +300,16 @@ export default function LiveSession() {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div style={{
+            padding: '12px 16px', marginBottom: 16,
+            borderRadius: 'var(--senjr-radius-lg)',
+            background: 'rgba(234,179,8,0.1)', border: '1.5px solid rgba(234,179,8,0.3)',
+          }}>
+            <p style={{ fontSize: 12, color: '#EAB308', fontWeight: 500, textAlign: 'center' }}>
+              Your camera and mic are never turned on without your permission.
+            </p>
           </div>
 
           {transcriptOn && (
