@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Clock, Trophy, Target, Sparkles, Zap, Brain, ChevronRight, BookOpen, Shield, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Clock, Trophy, Target, Sparkles, Zap, Brain, ChevronRight, BookOpen, Shield, BarChart3, Flame, Swords, Crosshair, AlertTriangle } from 'lucide-react'
 
 const examTypes = [
-  { id: 'jee', label: 'JEE', icon: <Zap size={20} />, color: 'var(--senjr-orange)', bg: 'var(--senjr-orange-light)', desc: 'Joint Entrance Exam' },
-  { id: 'neet', label: 'NEET', icon: <Brain size={20} />, color: 'var(--senjr-green)', bg: 'var(--senjr-green-light)', desc: 'Medical Entrance' },
-  { id: 'gate', label: 'GATE', icon: <BarChart3 size={20} />, color: 'var(--senjr-blue)', bg: 'var(--senjr-blue-lighter)', desc: 'Graduate Aptitude Test' },
-  { id: 'upsc', label: 'UPSC', icon: <BookOpen size={20} />, color: 'var(--senjr-purple)', bg: '#F5F3FF', desc: 'Civil Services Exam' },
-  { id: 'cat', label: 'CAT', icon: <Target size={20} />, color: '#EC4899', bg: '#FDF2F8', desc: 'Management Aptitude' },
-  { id: 'other', label: 'Other', icon: <Sparkles size={20} />, color: '#6366F1', bg: '#EEF2FF', desc: 'Custom Prep' },
+  { id: 'jee', label: 'JEE', icon: <Zap size={20} />, color: 'var(--senjr-orange)', bg: '#1E293B', desc: 'Joint Entrance Exam' },
+  { id: 'neet', label: 'NEET', icon: <Brain size={20} />, color: 'var(--senjr-green)', bg: '#064E3B', desc: 'Medical Entrance' },
+  { id: 'gate', label: 'GATE', icon: <BarChart3 size={20} />, color: '#3B82F6', bg: '#1E3A5F', desc: 'Graduate Aptitude Test' },
+  { id: 'upsc', label: 'UPSC', icon: <BookOpen size={20} />, color: '#8B5CF6', bg: '#2E1065', desc: 'Civil Services Exam' },
+  { id: 'cat', label: 'CAT', icon: <Target size={20} />, color: '#EC4899', bg: '#4C1D95', desc: 'Management Aptitude' },
+  { id: 'other', label: 'Other', icon: <Sparkles size={20} />, color: '#6366F1', bg: '#1E1B4B', desc: 'Custom Prep' },
 ]
 
 const exams = [
@@ -25,45 +25,74 @@ export default function WarRoom() {
   const [activeTab, setActiveTab] = useState<'exams' | 'practice' | 'analytics'>('exams')
 
   return (
-    <div className="senjr-app">
-      <header className="senjr-header" style={{
-        background: 'rgba(255,255,255,0.9)',
+    <div className="senjr-app" style={{ background: '#0A0F1E' }}>
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 16px', background: 'rgba(10,15,30,0.95)',
         backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #1E293B', position: 'sticky', top: 0, zIndex: 100,
       }}>
-        <button className="senjr-header-back" onClick={() => navigate(-1)}><ArrowLeft size={18} /></button>
-        <span className="senjr-header-title">Exam Center</span>
-        <div />
+        <button onClick={() => navigate(-1)} style={{
+          width: 36, height: 36, borderRadius: 10,
+          border: '1.5px solid #1E293B', background: '#131A2E',
+          color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+        }}>
+          <ArrowLeft size={18} />
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Swords size={18} style={{ color: 'var(--senjr-orange)' }} />
+          <span style={{ color: 'white', fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px' }}>War Room</span>
+          <span style={{ padding: '3px 10px', borderRadius: 4, background: '#DC2626', color: 'white', fontSize: 10, fontWeight: 700, letterSpacing: '0.5px', animation: 'pulse 2s infinite' }}>LIVE</span>
+        </div>
+        <div style={{ width: 36 }} />
       </header>
 
-      <div className="senjr-page">
-        <div className="senjr-content">
-          <div className="senjr-premium-card" style={{
-            background: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
-            border: 'none', color: 'white', padding: 20,
+      <div className="senjr-page" style={{ padding: 0, background: '#0A0F1E' }}>
+        <div className="senjr-content" style={{ padding: '16px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+            border: '1px solid #334155', borderRadius: 14, padding: 20,
+            marginBottom: 20, position: 'relative', overflow: 'hidden',
           }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--senjr-orange), var(--senjr-green), #3B82F6)' }} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-              <div style={{ textAlign: 'center', padding: 12 }}>
-                <Clock size={20} style={{ margin: '0 auto 6px', opacity: 0.8 }} />
-                <p style={{ fontSize: 20, fontWeight: 700, color: 'white' }}>42<span style={{ fontSize: 12, fontWeight: 500, opacity: 0.8 }}> hrs</span></p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Study Time</p>
+              <div style={{ textAlign: 'center', padding: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 6 }}>
+                  <Clock size={14} style={{ color: '#F97316' }} />
+                  <span style={{ color: '#F97316', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Study</span>
+                </div>
+                <p style={{ fontSize: 24, fontWeight: 800, color: 'white' }}>42<span style={{ fontSize: 13, fontWeight: 500, color: '#64748B' }}>h</span></p>
               </div>
-              <div style={{ textAlign: 'center', padding: 12 }}>
-                <Brain size={20} style={{ margin: '0 auto 6px', opacity: 0.8 }} />
-                <p style={{ fontSize: 20, fontWeight: 700, color: 'white' }}>156</p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Tests Taken</p>
+              <div style={{ textAlign: 'center', padding: 10, borderLeft: '1px solid #1E293B', borderRight: '1px solid #1E293B' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 6 }}>
+                  <Crosshair size={14} style={{ color: '#10B981' }} />
+                  <span style={{ color: '#10B981', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tests</span>
+                </div>
+                <p style={{ fontSize: 24, fontWeight: 800, color: 'white' }}>156</p>
               </div>
-              <div style={{ textAlign: 'center', padding: 12 }}>
-                <Trophy size={20} style={{ margin: '0 auto 6px', opacity: 0.8 }} />
-                <p style={{ fontSize: 20, fontWeight: 700, color: 'white' }}>78%</p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Avg Score</p>
+              <div style={{ textAlign: 'center', padding: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 6 }}>
+                  <Trophy size={14} style={{ color: '#F59E0B' }} />
+                  <span style={{ color: '#F59E0B', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Accuracy</span>
+                </div>
+                <p style={{ fontSize: 24, fontWeight: 800, color: 'white' }}>78<span style={{ fontSize: 13, fontWeight: 500, color: '#64748B' }}>%</span></p>
               </div>
             </div>
           </div>
 
-          <div className="senjr-tabs" style={{ marginBottom: 22 }}>
+          <div style={{
+            display: 'flex', gap: 4, padding: 4,
+            background: '#131A2E', borderRadius: 10,
+            border: '1px solid #1E293B', marginBottom: 20,
+          }}>
             {(['exams', 'practice', 'analytics'] as const).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`senjr-tab ${activeTab === tab ? 'senjr-tab-active' : ''}`}>
+              <button key={tab} onClick={() => setActiveTab(tab)} style={{
+                flex: 1, padding: '10px 16px', borderRadius: 8,
+                fontSize: 13, fontWeight: 600,
+                background: activeTab === tab ? 'linear-gradient(135deg, var(--senjr-orange), #EA580C)' : 'transparent',
+                color: activeTab === tab ? 'white' : '#64748B',
+                border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+              }}>
                 {tab === 'exams' ? 'Exams' : tab === 'practice' ? 'Practice' : 'Analytics'}
               </button>
             ))}
@@ -71,33 +100,47 @@ export default function WarRoom() {
 
           {activeTab === 'exams' && (
             <>
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--senjr-text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Select Exam Type</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Select Battle</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
                 {examTypes.map((exam) => (
-                  <button key={exam.id} className="senjr-premium-card" style={{ padding: 16, marginBottom: 0, background: exam.bg, border: '1px solid transparent', cursor: 'pointer', textAlign: 'center' }}>
-                    <div style={{ color: exam.color, marginBottom: 6 }}>{exam.icon}</div>
-                    <p style={{ fontSize: 13, fontWeight: 600 }}>{exam.label}</p>
-                    <p style={{ fontSize: 10, color: 'var(--senjr-text-muted)', lineHeight: 1.3 }}>{exam.desc}</p>
+                  <button key={exam.id} style={{
+                    padding: 16, marginBottom: 0, cursor: 'pointer', textAlign: 'center',
+                    background: exam.bg, border: '1px solid #334155', borderRadius: 12,
+                    transition: 'all 0.15s',
+                  }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 10,
+                      background: `${exam.color}20`, border: `1px solid ${exam.color}40`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      margin: '0 auto 8px', color: exam.color,
+                    }}>{exam.icon}</div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>{exam.label}</p>
+                    <p style={{ fontSize: 10, color: '#64748B', lineHeight: 1.3 }}>{exam.desc}</p>
                   </button>
                 ))}
               </div>
 
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--senjr-text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Upcoming & Past Exams</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Mission Log</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {exams.map((exam) => (
-                  <div key={exam.id} className="senjr-premium-card" style={{
+                  <div key={exam.id} style={{
                     display: 'flex', alignItems: 'center', gap: 14, padding: 14,
-                    background: exam.score ? 'var(--senjr-green-lightest)' : 'var(--senjr-bg-card)',
+                    background: exam.score ? '#064E3B' : '#131A2E',
+                    border: `1px solid ${exam.score ? '#065F46' : '#1E293B'}`,
+                    borderRadius: 12,
                   }}>
-                    <div className="senjr-icon-circle" style={{
-                      background: examTypes.find(e => e.id === exam.type)?.bg || '#F3F4F6',
-                      color: examTypes.find(e => e.id === exam.type)?.color || '#6B7280',
+                    <div style={{
+                      width: 42, height: 42, borderRadius: 10,
+                      background: '#1E293B', border: '1px solid #334155',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: examTypes.find(e => e.id === exam.type)?.color || '#64748B',
+                      flexShrink: 0,
                     }}>
                       {examTypes.find(e => e.id === exam.type)?.icon || <BookOpen size={18} />}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 14, fontWeight: 600 }}>{exam.name}</p>
-                      <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'var(--senjr-text-muted)' }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>{exam.name}</p>
+                      <div style={{ display: 'flex', gap: 14, fontSize: 11, color: '#64748B' }}>
                         <span>{exam.questions} Q</span>
                         <span>{exam.duration}</span>
                         <span>{exam.date}</span>
@@ -105,11 +148,16 @@ export default function WarRoom() {
                     </div>
                     {exam.score ? (
                       <div style={{ textAlign: 'center' }}>
-                        <p style={{ fontSize: 22, fontWeight: 800, color: exam.score >= 80 ? 'var(--senjr-green)' : 'var(--senjr-orange)' }}>{exam.score}%</p>
-                        <p style={{ fontSize: 10, color: 'var(--senjr-text-muted)' }}>Score</p>
+                        <p style={{ fontSize: 22, fontWeight: 800, color: exam.score >= 80 ? '#10B981' : '#F97316' }}>{exam.score}%</p>
+                        <p style={{ fontSize: 10, color: '#64748B' }}>Score</p>
                       </div>
                     ) : (
-                      <button className="senjr-btn-premium" style={{ padding: '8px 16px', fontSize: 13, width: 'auto', borderRadius: 50 }}>Start</button>
+                      <button style={{
+                        padding: '8px 18px', fontSize: 13, fontWeight: 600, borderRadius: 8,
+                        background: 'linear-gradient(135deg, var(--senjr-orange), #EA580C)',
+                        color: 'white', border: 'none', cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(249,115,22,0.3)',
+                      }}>Start</button>
                     )}
                   </div>
                 ))}
@@ -119,58 +167,117 @@ export default function WarRoom() {
 
           {activeTab === 'practice' && (
             <>
-              <div className="senjr-premium-card" style={{ marginBottom: 20, textAlign: 'center', padding: 28, background: 'var(--senjr-green-lightest)', border: '1px solid var(--senjr-green-light)' }}>
-                <Shield size={36} style={{ color: 'var(--senjr-green-dark)', margin: '0 auto 12px' }} />
-                <p style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>AI Practice Session</p>
-                <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)', marginBottom: 16 }}>Practice any topic with AI-generated questions</p>
-                <button className="senjr-btn-premium" style={{ width: 'auto', padding: '10px 24px', fontSize: 14, borderRadius: 50 }}><Sparkles size={14} /> Start Practice</button>
+              <div style={{
+                marginBottom: 20, textAlign: 'center', padding: 28,
+                background: 'linear-gradient(135deg, #064E3B, #065F46)',
+                border: '1px solid #059669', borderRadius: 14,
+                position: 'relative', overflow: 'hidden',
+              }}>
+                <div style={{ position: 'absolute', top: -20, right: -20, opacity: 0.1 }}>
+                  <Shield size={120} style={{ color: '#10B981' }} />
+                </div>
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <Flame size={40} style={{ color: '#10B981', margin: '0 auto 12px' }} />
+                  <p style={{ fontSize: 18, fontWeight: 700, color: 'white', marginBottom: 6 }}>AI Battle Practice</p>
+                  <p style={{ fontSize: 14, color: '#6EE7B7', marginBottom: 18 }}>Practice any topic with AI-generated questions</p>
+                  <button style={{
+                    padding: '12px 28px', fontSize: 14, fontWeight: 600, borderRadius: 50,
+                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                    color: 'white', border: 'none', cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(16,185,129,0.3)',
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                  }}>
+                    <Sparkles size={16} /> Start Practice
+                  </button>
+                </div>
               </div>
 
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--senjr-text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Focus Areas</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Weak Zones</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 22 }}>
                 {weakTopics.map((topic) => (
-                  <div key={topic} className="senjr-list-item" style={{ background: 'var(--senjr-orange-lightest)', cursor: 'default' }}>
-                    <Target size={14} style={{ color: 'var(--senjr-orange)', flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, flex: 1 }}>{topic}</span>
-                    <span className="senjr-tag-orange-premium">Weak</span>
+                  <div key={topic} style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                    background: '#1E293B', border: '1px solid #334155', borderRadius: 10,
+                  }}>
+                    <AlertTriangle size={14} style={{ color: '#F97316', flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, flex: 1, color: '#CBD5E1' }}>{topic}</span>
+                    <span style={{
+                      padding: '3px 10px', borderRadius: 20,
+                      background: '#F9731620', color: '#F97316',
+                      fontSize: 11, fontWeight: 600, border: '1px solid #F9731630',
+                    }}>Weak</span>
                   </div>
                 ))}
               </div>
 
-              <button className="senjr-btn-premium" style={{ background: 'linear-gradient(135deg, var(--senjr-orange), var(--senjr-orange-dark))', boxShadow: '0 4px 12px rgba(249,115,22,0.3)' }}>Generate Custom Quiz <Sparkles size={16} /></button>
+              <button style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                padding: '14px 0', width: '100%', borderRadius: 12,
+                background: 'linear-gradient(135deg, var(--senjr-orange), #EA580C)',
+                color: 'white', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 15,
+                boxShadow: '0 4px 16px rgba(249,115,22,0.3)',
+              }}>
+                <Sparkles size={18} /> Generate Custom Quiz
+              </button>
             </>
           )}
 
           {activeTab === 'analytics' && (
             <>
-              <div className="senjr-premium-card" style={{ marginBottom: 18 }}>
-                <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Performance Overview</p>
+              <div style={{
+                marginBottom: 18, background: '#131A2E',
+                border: '1px solid #1E293B', borderRadius: 14, padding: 18,
+              }}>
+                <p style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 14 }}>Combat Stats</p>
                 <div style={{ display: 'flex', gap: 12 }}>
-                  {[{ label: 'Accuracy', value: '78%', color: 'var(--senjr-green)' }, { label: 'Avg Time', value: '32s', color: 'var(--senjr-orange)' }, { label: 'Streak', value: '7d', color: 'var(--senjr-blue)' }].map((stat) => (
-                    <div key={stat.label} style={{ flex: 1, padding: 14, background: 'var(--senjr-bg)', borderRadius: 'var(--senjr-radius)', textAlign: 'center', border: '1px solid var(--senjr-border)' }}>
-                      <p style={{ fontSize: 24, fontWeight: 800, color: stat.color }}>{stat.value}</p>
-                      <p style={{ fontSize: 11, color: 'var(--senjr-text-muted)' }}>{stat.label}</p>
+                  {[
+                    { label: 'Accuracy', value: '78%', color: '#10B981', icon: <Crosshair size={16} /> },
+                    { label: 'Avg Time', value: '32s', color: '#F97316', icon: <Clock size={16} /> },
+                    { label: 'Streak', value: '7d', color: '#3B82F6', icon: <Flame size={16} /> },
+                  ].map((stat) => (
+                    <div key={stat.label} style={{
+                      flex: 1, padding: 14,
+                      background: '#0A0F1E', borderRadius: 10,
+                      textAlign: 'center', border: '1px solid #1E293B',
+                    }}>
+                      <div style={{ color: stat.color, marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{stat.icon}</div>
+                      <p style={{ fontSize: 22, fontWeight: 800, color: stat.color }}>{stat.value}</p>
+                      <p style={{ fontSize: 11, color: '#64748B' }}>{stat.label}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="senjr-premium-card" style={{ marginBottom: 18 }}>
-                <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Subject-wise Performance</p>
-                {[{ subject: 'Physics', score: 72 }, { subject: 'Chemistry', score: 85 }, { subject: 'Mathematics', score: 68 }].map((sub) => (
-                  <div key={sub.subject} style={{ marginBottom: 12 }}>
-                    <div className="senjr-flex-between" style={{ marginBottom: 6 }}>
-                      <span style={{ fontSize: 13, fontWeight: 500 }}>{sub.subject}</span>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--senjr-green)' }}>{sub.score}%</span>
+              <div style={{
+                marginBottom: 18, background: '#131A2E',
+                border: '1px solid #1E293B', borderRadius: 14, padding: 18,
+              }}>
+                <p style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 14 }}>Subject Readiness</p>
+                {[
+                  { subject: 'Physics', score: 72, color: '#F97316' },
+                  { subject: 'Chemistry', score: 85, color: '#10B981' },
+                  { subject: 'Mathematics', score: 68, color: '#3B82F6' },
+                ].map((sub) => (
+                  <div key={sub.subject} style={{ marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: '#CBD5E1' }}>{sub.subject}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: sub.color }}>{sub.score}%</span>
                     </div>
-                    <div className="senjr-progress-bar" style={{ height: 8 }}>
-                      <div className="senjr-progress-fill" style={{ width: `${sub.score}%` }} />
+                    <div style={{ height: 8, background: '#1E293B', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ width: `${sub.score}%`, height: '100%', background: `linear-gradient(90deg, ${sub.color}, ${sub.color}88)`, borderRadius: 4, transition: 'width 0.5s ease' }} />
                     </div>
                   </div>
                 ))}
               </div>
 
-              <button className="senjr-btn-premium" style={{ background: 'var(--senjr-bg-card)', color: 'var(--senjr-text)', border: '1.5px solid var(--senjr-border-dark)', boxShadow: 'none' }}>View Detailed Report <ChevronRight size={16} /></button>
+              <button style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                padding: '14px 0', width: '100%', borderRadius: 12,
+                background: '#131A2E', color: '#CBD5E1',
+                border: '1px solid #1E293B', cursor: 'pointer', fontWeight: 600, fontSize: 14,
+              }}>
+                View Detailed Report <ChevronRight size={16} />
+              </button>
             </>
           )}
         </div>
