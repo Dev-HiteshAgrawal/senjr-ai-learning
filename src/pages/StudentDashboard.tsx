@@ -16,7 +16,7 @@ export default function StudentDashboard() {
     if (h < 17) return 'Good Afternoon'
     return 'Good Evening'
   }
-  const [now, setNow] = useState(() => Date.now())
+  const [now, setNow] = useState(Date.now)
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)

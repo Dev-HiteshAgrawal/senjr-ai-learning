@@ -71,6 +71,9 @@ export default function AITutorChat() {
     const randomPart = Math.random().toString(36).slice(2)
     return `chat_${timestamp}_${randomPart}`
   })
+  const randomRef = useRef({
+    random: () => Math.random()
+  })
   const [selectedImage, setSelectedImage] = useState<{ name: string; preview: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -78,22 +81,22 @@ export default function AITutorChat() {
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   useEffect(() => { scrollToBottom() }, [messages])
 
-  useEffect(() => {
-    if (messages.length === 0) {
-      const greetings: Record<TutorType, string> = {
-        math: 'Hi! I\'m Arya, your JEE Maths expert. What would you like to work on today?',
-        uppolice: 'Namaste! I\'m Raj, your UP Police prep guide. Ready to crack some questions?',
-        english: 'Hello! I\'m Priya. Let\'s improve your English and reasoning skills together!',
-        general: 'Hey there! I\'m Sam, your general tutor. What are you studying today?',
-      }
-      const greeting: ChatMessage = {
-        from: 'mentor', name: currentTutor.name, role: currentTutor.role,
-        text: greetings[currentTutor.id],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      }
-       setMessages([greeting])
-    }
-  }, [currentTutor.id, currentTutor.name, currentTutor.role])
+   useEffect(() => {
+     if (messages.length === 0) {
+       const greetings: Record<TutorType, string> = {
+         math: 'Hi! I\'m Arya, your JEE Maths expert. What would you like to work on today?',
+         uppolice: 'Namaste! I\'m Raj, your UP Police prep guide. Ready to crack some questions?',
+         english: 'Hello! I\'m Priya. Let\'s improve your English and reasoning skills together!',
+         general: 'Hey there! I\'m Sam, your general tutor. What are you studying today?',
+       }
+       const greeting: ChatMessage = {
+         from: 'mentor', name: currentTutor.name, role: currentTutor.role,
+         text: greetings[currentTutor.id],
+         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+       }
+       setMessages(() => [greeting])
+     }
+   }, [currentTutor.id, currentTutor.name, currentTutor.role, messages.length])
 
   const quickActions = [
     { icon: Lightbulb, label: 'Explain', action: 'explain' },
@@ -114,9 +117,9 @@ export default function AITutorChat() {
       return data.response
     } catch {
       const replies = mockResponses[currentTutor.id]
-       const randomIdx = Math.floor(Math.random() * replies.length)
-       await new Promise(r => setTimeout(r, 800 + Math.random() * 600))
-       return replies[randomIdx]
+        const randomIdx = Math.floor(randomRef.current.random() * replies.length)
+        await new Promise(r => setTimeout(r, 800 + randomRef.current.random() * 600))
+        return replies[randomIdx]
     }
   }
 
