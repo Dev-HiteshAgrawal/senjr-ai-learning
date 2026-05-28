@@ -66,17 +66,20 @@ export default function Auth() {
     <div className="senjr-app">
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, var(--senjr-green-bg) 0%, var(--senjr-orange-bg) 100%)',
+        background: 'linear-gradient(160deg, var(--senjr-green-lightest) 0%, var(--senjr-orange-lightest) 40%, var(--senjr-blue-lighter) 70%, var(--senjr-purple-light) 100%)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         padding: '24px 16px', position: 'relative',
       }}>
         <button
           style={{
             position: 'absolute', top: 16, left: 16,
-            width: 36, height: 36, borderRadius: 10,
+            width: 38, height: 38, borderRadius: 'var(--senjr-radius)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'var(--senjr-bg-card)', border: '1.5px solid var(--senjr-border)',
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(8px)',
+            border: '1.5px solid var(--senjr-border)',
             cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
           onClick={() => navigate('/')}
         >
@@ -85,17 +88,18 @@ export default function Auth() {
 
         <div className="senjr-fade-in" style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{
-            width: 64, height: 64, borderRadius: 16,
+            width: 68, height: 68, borderRadius: 18,
             background: 'linear-gradient(135deg, var(--senjr-green), var(--senjr-green-dark))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px', boxShadow: '0 4px 12px rgba(16,185,129,0.3)',
+            margin: '0 auto 16px',
+            boxShadow: '0 4px 16px rgba(16,185,129,0.3)',
           }}>
-            <span style={{ fontSize: 32, fontWeight: 800, color: 'white' }}>S</span>
+            <span style={{ fontSize: 34, fontWeight: 800, color: 'white' }}>S</span>
           </div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 6, letterSpacing: '-0.5px' }}>
             {mode === 'login' ? 'Welcome back!' : 'Join Senjr'}
           </h1>
-          <p style={{ fontSize: 14, color: 'var(--senjr-text-muted)' }}>
+          <p style={{ fontSize: 15, color: 'var(--senjr-text-muted)' }}>
             {mode === 'login' ? 'Continue your learning journey' : 'Start learning from seniors'}
           </p>
           {!isConfigured && (
@@ -105,32 +109,37 @@ export default function Auth() {
           )}
         </div>
 
-        <div className="senjr-card" style={{
-          width: '100%', maxWidth: 400,
+        <div className="senjr-premium-card" style={{
+          width: '100%', maxWidth: 400, padding: 24,
+          background: 'rgba(255,255,255,0.9)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.3)',
         }}>
           {mode === 'signup' && (
-            <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 22 }}>
               <button type="button"
+                className="senjr-btn-premium"
                 style={{
-                  flex: 1, padding: '12px 0', borderRadius: 10, fontSize: 14, fontWeight: 600,
+                  flex: 1, padding: '12px 0', fontSize: 14, fontWeight: 600,
                   border: role === 'student' ? '2px solid var(--senjr-green)' : '2px solid var(--senjr-border)',
-                  background: role === 'student' ? 'var(--senjr-green)' : 'var(--senjr-bg-card)',
-                  color: role === 'student' ? 'white' : 'var(--senjr-text)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  transition: 'all 0.15s ease',
+                  background: role === 'student' ? 'linear-gradient(135deg, var(--senjr-green), var(--senjr-green-dark))' : 'rgba(255,255,255,0.7)',
+                  color: role === 'student' ? 'white' : 'var(--senjr-text)',
+                  boxShadow: role === 'student' ? '0 4px 12px rgba(16,185,129,0.2)' : 'none',
+                  borderRadius: 'var(--senjr-radius)',
                 }}
                 onClick={() => { setRole('student'); setError('') }}
               >
                 <GraduationCap size={16} /> Student
               </button>
               <button type="button"
+                className="senjr-btn-premium"
                 style={{
-                  flex: 1, padding: '12px 0', borderRadius: 10, fontSize: 14, fontWeight: 600,
+                  flex: 1, padding: '12px 0', fontSize: 14, fontWeight: 600,
                   border: role === 'mentor' ? '2px solid var(--senjr-orange)' : '2px solid var(--senjr-border)',
-                  background: role === 'mentor' ? 'var(--senjr-orange)' : 'var(--senjr-bg-card)',
-                  color: role === 'mentor' ? 'white' : 'var(--senjr-text)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  transition: 'all 0.15s ease',
+                  background: role === 'mentor' ? 'linear-gradient(135deg, var(--senjr-orange), var(--senjr-orange-dark))' : 'rgba(255,255,255,0.7)',
+                  color: role === 'mentor' ? 'white' : 'var(--senjr-text)',
+                  boxShadow: role === 'mentor' ? '0 4px 12px rgba(249,115,22,0.2)' : 'none',
+                  borderRadius: 'var(--senjr-radius)',
                 }}
                 onClick={() => { setRole('mentor'); setError('') }}
               >
@@ -140,12 +149,14 @@ export default function Auth() {
           )}
 
           {mode === 'login' && (
-            <div style={{ marginBottom: 20, textAlign: 'center' }}>
-              <div style={{ display: 'flex', gap: 0, borderRadius: 10, overflow: 'hidden', border: '1.5px solid var(--senjr-border)' }}>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ display: 'flex', gap: 0, borderRadius: 'var(--senjr-radius)', overflow: 'hidden', border: '1.5px solid var(--senjr-border)', background: 'rgba(255,255,255,0.5)' }}>
                 <button type="button"
                   style={{
-                    flex: 1, padding: '10px 0', fontSize: 14, fontWeight: 600,
-                    background: 'var(--senjr-green)', color: 'white', border: 'none', cursor: 'pointer',
+                    flex: 1, padding: '11px 0', fontSize: 14, fontWeight: 600,
+                    background: role === 'student' ? 'linear-gradient(135deg, var(--senjr-green), var(--senjr-green-dark))' : 'transparent',
+                    color: role === 'student' ? 'white' : 'var(--senjr-text)', border: 'none', cursor: 'pointer',
+                    transition: 'all 0.15s ease',
                   }}
                   onClick={() => { setRole('student'); setError('') }}
                 >
@@ -153,9 +164,10 @@ export default function Auth() {
                 </button>
                 <button type="button"
                   style={{
-                    flex: 1, padding: '10px 0', fontSize: 14, fontWeight: 600,
-                    background: role === 'mentor' ? 'var(--senjr-orange)' : 'var(--senjr-bg-card)',
+                    flex: 1, padding: '11px 0', fontSize: 14, fontWeight: 600,
+                    background: role === 'mentor' ? 'linear-gradient(135deg, var(--senjr-orange), var(--senjr-orange-dark))' : 'transparent',
                     color: role === 'mentor' ? 'white' : 'var(--senjr-text)', border: 'none', cursor: 'pointer',
+                    transition: 'all 0.15s ease',
                   }}
                   onClick={() => { setRole('mentor'); setError('') }}
                 >
@@ -169,7 +181,7 @@ export default function Auth() {
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 8,
+              border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 'var(--senjr-radius)',
               marginBottom: 16, color: '#ef4444', fontSize: 13,
             }}>
               <AlertCircle size={16} /> <span>{error}</span>
@@ -203,8 +215,12 @@ export default function Auth() {
               </div>
             </div>
 
-            <button type="submit" className={`senjr-btn ${role === 'mentor' ? 'senjr-btn-orange' : 'senjr-btn-green'}`}
-              style={{ marginBottom: 12, opacity: isSubmitting ? 0.7 : 1 }} disabled={isSubmitting}>
+            <button type="submit" className="senjr-btn-premium"
+              style={{
+                marginBottom: 14, opacity: isSubmitting ? 0.7 : 1,
+                background: role === 'mentor' ? 'linear-gradient(135deg, var(--senjr-orange), var(--senjr-orange-dark))' : 'linear-gradient(135deg, var(--senjr-green), var(--senjr-green-dark))',
+                boxShadow: role === 'mentor' ? '0 4px 12px rgba(249,115,22,0.3)' : '0 4px 12px rgba(16,185,129,0.3)',
+              }} disabled={isSubmitting}>
               {isSubmitting ? (
                 <><Loader2 size={18} className="animate-spin" /> {mode === 'login' ? 'Signing in...' : 'Creating account...'}</>
               ) : (
@@ -213,7 +229,7 @@ export default function Auth() {
             </button>
           </form>
 
-          <div className="senjr-divider-text" style={{ marginBottom: 12 }}>
+          <div className="senjr-divider-text" style={{ marginBottom: 14 }}>
             <span>{mode === 'login' ? 'New here?' : 'Already registered?'}</span>
           </div>
 
@@ -222,7 +238,7 @@ export default function Auth() {
               style={{
                 color: role === 'mentor' ? 'var(--senjr-orange)' : 'var(--senjr-green)',
                 fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, margin: '0 auto',
+                fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 6,
               }}>
               {mode === 'login' ? 'Create a new account' : 'Sign in instead'} <Sparkles size={14} />
             </button>

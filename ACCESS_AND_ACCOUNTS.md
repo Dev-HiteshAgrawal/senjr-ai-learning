@@ -1,6 +1,6 @@
 # Senjr Access and Account Summary
 
-Last checked: 2026-05-26 (Auth + Deploy Engineer heartbeat)
+Last checked: 2026-05-28 (Auth + Deploy Engineer heartbeat)
 
 ## Direct Website Link
 

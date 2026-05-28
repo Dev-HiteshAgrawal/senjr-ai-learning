@@ -21,6 +21,7 @@ import UserProfile from './pages/UserProfile'
 import MentorPortfolio from './pages/MentorPortfolio'
 import LiveSession from './pages/LiveSession'
 import MockTest from './pages/MockTest'
+import DesignSystem from './pages/DesignSystem'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Public routes - accessible without authentication
@@ -28,6 +29,7 @@ const publicRoutes = (
   <>
     <Route path="/" element={<Landing />} />
     <Route path="/auth" element={<Auth />} />
+    <Route path="/design-system" element={<DesignSystem />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </>
 )
